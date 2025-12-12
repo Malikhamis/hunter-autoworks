@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Invoices — Hunter Auto</title>
+  <link rel="stylesheet" href="styles-clean.css">
+  <script>
+    // Apply dark mode immediately to prevent flash
+    if (localStorage.getItem('appSettings')) {
+      const settings = JSON.parse(localStorage.getItem('appSettings'));
+      if (settings.darkMode) {
+        document.addEventListener('DOMContentLoaded', function() {
+          document.body.classList.add('dark-mode');
+        });
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" role="navigation" aria-label="Main navigation">
+      <div class="brand">
+        <img src="../images/logo.jpg" alt="logo" width="36" height="36" onerror="this.style.display='none'" />
+        <div>
+          <div style="font-weight:900">Hunter Auto</div>
+          <div class="small">Admin</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a href="index.html">Dashboard</a>
+        <a href="documents.html">Documents</a>
+        <a href="invoices.html" class="active">Invoices</a>
+        <a href="clients.html">Clients</a>
+        <a href="services.html">Services</a>
+        <a href="reports.html">Reports</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+
+      <div class="small">v1.0 · Local-first · Supabase</div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div class="left">
+          <button id="hamburger" class="hamburger" aria-label="Open menu">☰</button>
+          <h1 style="font-size:1.125rem;margin:0;background:var(--gradient-primary);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent">📄 Invoices</h1>
+        </div>
+        <div class="actions">
+          <button id="btn-new-invoice" class="action-btn" style="padding:8px 16px;font-size:0.875rem">➕ New Invoice</button>
+        </div>
+      </header>
+
+      <section class="container" style="padding:24px;max-width:1600px">
+        <!-- Two Column Layout -->
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:24px">
+          
+          <!-- Left: Invoice Creator -->
+          <div>
+            <div class="card card-premium fade-in">
+              <div style="margin-bottom:20px">
+                <h2 style="margin:0 0 4px 0;font-size:1.5rem;font-weight:700;color:var(--text-primary)">📝 Create Invoice</h2>
+                <p style="margin:0;color:var(--text-muted);font-size:0.875rem">Create a new invoice for your clients</p>
+              </div>
+              
+              <!-- Invoice Details -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+                <div>
+                  <label style="display:block;font-size:0.875rem;font-weight:600;color:var(--text-primary);margin-bottom:6px">Invoice No</label>
+                  <input id="invoiceNo" type="text" placeholder="INV-2025-XXX" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:var(--radius-md);font-size:0.875rem;transition:all 0.2s" onfocus="this.style.borderColor='var(--primary)';this.style.boxShadow='0 0 0 3px rgba(0,178,255,0.1)'" onblur="this.style.borderColor='var(--gray-200)';this.style.boxShadow='none'">
+                </div>
+                <div>
+                  <label style="display:block;font-size:0.875rem;font-weight:600;color:var(--text-primary);margin-bottom:6px">Client</label>
+                  <input id="invoiceClient" type="text" placeholder="Client name or ID" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:var(--radius-md);font-size:0.875rem;transition:all 0.2s" onfocus="this.style.borderColor='var(--primary)';this.style.boxShadow='0 0 0 3px rgba(0,178,255,0.1)'" onblur="this.style.borderColor='var(--gray-200)';this.style.boxShadow='none'">
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+                <div>
+                  <label style="display:block;font-size:0.875rem;font-weight:600;color:var(--text-primary);margin-bottom:6px">Date</label>
+                  <input id="invoiceDate" type="date" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:var(--radius-md);font-size:0.875rem;transition:all 0.2s" onfocus="this.style.borderColor='var(--primary)';this.style.boxShadow='0 0 0 3px rgba(0,178,255,0.1)'" onblur="this.style.borderColor='var(--gray-200)';this.style.boxShadow='none'">
+                </div>
+                <div>
+                  <label style="display:block;font-size:0.875rem;font-weight:600;color:var(--text-primary);margin-bottom:6px">Due Date</label>
+                  <input id="invoiceDueDate" type="date" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:var(--radius-md);font-size:0.875rem;transition:all 0.2s" onfocus="this.style.borderColor='var(--primary)';this.style.boxShadow='0 0 0 3px rgba(0,178,255,0.1)'" onblur="this.style.borderColor='var(--gray-200)';this.style.boxShadow='none'">
+                </div>
+              </div>
+
+              <!-- Items Section -->
+              <div style="border-top:1px solid var(--gray-200);padding-top:20px;margin-bottom:16px">
+                <label style="display:block;font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:12px">🛠️ Items</label>
+                
+                <!-- Service Selection -->
+                <div id="invoiceServiceList" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;max-height:300px;overflow-y:auto;padding:12px;background:var(--surface-2);border-radius:var(--radius-md)"></div>
+                
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--surface-1);border:2px solid var(--primary);border-radius:var(--radius-md);margin-bottom:12px">
+                  <div id="selectedServicesTotal" style="font-size:1rem;font-weight:700;color:var(--primary)">Selected: TSh 0</div>
+                  <button id="addSelectedServiceBtn" class="action-btn" style="padding:8px 16px;font-size:0.875rem">Add Selected</button>
+                </div>
+
+                <div id="invoiceItems" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
+                <button id="addInvoiceItemBtn" class="action-btn" style="width:100%;padding:10px;font-size:0.875rem;background:var(--gradient-success)">➕ Add Custom Item</button>
+              </div>
+
+              <!-- Total -->
+              <div style="border-top:1px solid var(--gray-200);padding-top:20px;margin-bottom:20px">
+                <label style="display:block;font-size:0.875rem;font-weight:600;color:var(--text-primary);margin-bottom:6px">Total Amount (TSh)</label>
+                <input id="invoiceTotal" type="number" readonly style="width:100%;padding:12px;border:2px solid var(--primary);border-radius:var(--radius-md);font-size:1.5rem;font-weight:700;color:var(--primary);background:var(--surface-1);text-align:right">
+              </div>
+
+              <!-- Action Buttons -->
+              <div style="display:flex;gap:12px">
+                <button id="saveInvoiceBtn" class="action-btn" style="flex:1;padding:12px;font-size:0.875rem">💾 Save Invoice</button>
+                <button id="syncInvoicesBtn" class="action-btn" style="flex:1;padding:12px;font-size:0.875rem;background:var(--gradient-success)">🔄 Sync Now</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Saved Invoices -->
+          <div>
+            <div class="card card-premium fade-in" style="animation-delay:0.1s">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <h3 style="margin:0;font-size:1.125rem;font-weight:700;color:var(--text-primary)">💼 Saved Invoices</h3>
+                <span class="badge badge-primary" id="invoiceCount">0</span>
+              </div>
+              <div id="invoicesList" style="display:flex;flex-direction:column;gap:12px;max-height:600px;overflow-y:auto"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="successMessage" class="message success" style="display:none"></div>
+        <div id="errorMessage" class="message error" style="display:none"></div>
+      </section>
+    </main>
+
+  <!-- Mobile Overlay -->
+  <div id="mobileOverlay" class="mobile-overlay"></div>
+
+  <script src="admin.js"></script>
+  <script>
+    // Invoice-specific initialization
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set today's date as default
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('invoiceDate').value = today;
+
+      // Initialize invoice UI elements
+      if (typeof loadDocumentsList === 'function') loadDocumentsList();
+
+      // Update invoice count
+      const updateInvoiceCount = () => {
+        const docs = JSON.parse(localStorage.getItem('documents') || '[]').filter(d => d.type === 'invoice');
+        const countEl = document.getElementById('invoiceCount');
+        if (countEl) countEl.textContent = docs.length;
+      };
+      updateInvoiceCount();
+
+      // Add custom item button with modern styling
+      const addItemBtn = document.getElementById('addInvoiceItemBtn');
+      if (addItemBtn) {
+        addItemBtn.addEventListener('click', () => {
+          const itemsDiv = document.getElementById('invoiceItems');
+          const idx = itemsDiv.children.length;
+          const row = document.createElement('div');
+          row.className = 'slide-in';
+          row.innerHTML = `
+            <input placeholder="Description" class="item-desc" style="padding:8px;border:1px solid var(--gray-200);border-radius:6px;font-size:0.875rem">
+            <input type="number" placeholder="Qty" class="item-qty" value="1" style="padding:8px;border:1px solid var(--gray-200);border-radius:6px;font-size:0.875rem">
+            <input type="number" placeholder="Unit (TSh)" class="item-unit" value="0" style="padding:8px;border:1px solid var(--gray-200);border-radius:6px;font-size:0.875rem">
+            <button class="remove-item">🗑️ Remove</button>
+          `;
+          itemsDiv.appendChild(row);
+          if (typeof attachItemRowListeners === 'function') attachItemRowListeners(row);
+          if (typeof updateInvoiceTotal === 'function') updateInvoiceTotal();
+        });
+      }
+
+      // Populate services with modern checkbox styling
+      if (typeof populateInvoiceServiceSelect === 'function') {
+        populateInvoiceServiceSelect('invoiceServiceList').then?.(() => {
+          // Add icons to service labels
+          const serviceList = document.getElementById('invoiceServiceList');
+          if (serviceList) {
+            Array.from(serviceList.querySelectorAll('label')).forEach((label, i) => {
+              const text = label.textContent.trim();
+              const icons = ['🛢️', '🔴', '🛞', '⚙️', '🔋', '💦', '🎨', '🔧', '🔍', '🔨'];
+              const icon = icons[i % icons.length];
+              if (!text.includes('—')) return;
+              const [name, price] = text.split('—');
+              label.innerHTML = label.innerHTML.replace(text, `${icon} <strong>${name.trim()}</strong> <span style="margin-left:auto;font-weight:700;color:var(--primary)">${price.trim()}</span>`);
+            });
+          }
+        });
+      }
+
+      // Override save button to update count
+      const saveBtn = document.getElementById('saveInvoiceBtn');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+          setTimeout(updateInvoiceCount, 100);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

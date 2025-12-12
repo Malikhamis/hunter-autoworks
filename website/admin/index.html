@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Dashboard - Hunter Auto Admin</title>
+        <link rel="stylesheet" href="styles-clean.css" />
+    </head>
+    <body>
+        <div class="app-shell">
+            <aside class="sidebar" role="navigation" aria-label="Main navigation">
+                <div class="brand">
+                    <img src="../images/logo.jpg" alt="logo" width="32" height="32" onerror="this.style.display='none'" />
+                    <div>
+                        <h2>Hunter Auto</h2>
+                        <div class="small">Admin Panel</div>
+                    </div>
+                </div>
+
+                <nav class="nav">
+                    <a href="#" class="active" onclick="showTab('dashboard')"><span>Dashboard</span></a>
+                    <a href="#" onclick="showTab('services')"><span>Services</span></a>
+                    <a href="#" onclick="showTab('documents')"><span>Documents</span></a>
+                    <a href="#" onclick="showTab('analytics')"><span>Analytics</span></a>
+                    <a href="clients.html"><span>Clients</span></a>
+                    <a href="invoices.html"><span>Invoices</span></a>
+                    <a href="reports.html"><span>Reports</span></a>
+                    <a href="settings.html"><span>Settings</span></a>
+                </nav>
+
+                <div class="version">v1.0 · Local-first · Supabase</div>
+            </aside>
+
+            <main class="main-area">
+                <header class="topbar">
+                    <div class="left">
+                        <button id="hamburger" class="hamburger" aria-label="Open menu">☰</button>
+                        <div class="brand"><h1>Dashboard</h1></div>
+                    </div>
+                    <div class="actions">
+                        <button class="settings-gear" id="settings">⚙</button>
+                        <button id="loginBtn" class="action-btn">Log in</button>
+                    </div>
+                </header>
+
+                <section class="content">
+                    <!-- Dashboard content will be loaded here -->
+                </section>
+            </main>
+        </div>
+
+    <!-- Login Form -->
+    <div id="loginContainer" class="compact-login-container">
+        <div class="compact-login-box" style="max-width: 320px; padding: 1.25rem;">
+            <div class="compact-login-header" style="margin-bottom: 1rem; text-align: center;">
+                <h1 style="font-size: 1.25rem; margin: 0 0 0.25rem 0;">Admin Login</h1>
+                <p style="font-size: 0.875rem; margin: 0; color: var(--gray-500);">Welcome to Hunter Auto Admin Panel</p>
+            </div>
+            
+            <div id="loginError" class="message error" style="margin-bottom: 0.75rem;"></div>
+            
+            <form id="loginForm" autocomplete="on">
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label for="username" style="font-size: 0.875rem; margin-bottom: 0.25rem;">Username</label>
+                    <input type="text" id="username" name="username" required autocomplete="username" style="padding: 0.5rem; font-size: 0.875rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label for="password" style="font-size: 0.875rem; margin-bottom: 0.25rem;">Password</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password" style="padding: 0.5rem; font-size: 0.875rem;">
+                </div>
+                <button type="submit" class="compact-btn compact-btn-primary" style="width:100%;margin-bottom:0.5rem;padding:0.5rem;font-size:0.875rem;">Login</button>
+                <button type="button" id="createAdminBtn" class="compact-btn compact-btn-success" style="width:100%;margin-bottom:0.5rem;padding:0.5rem;font-size:0.875rem;">Create New Admin</button>
+                <button type="button" id="resetAdminBtn" class="compact-btn compact-btn-outline" style="width:100%;padding:0.5rem;font-size:0.875rem;">Reset Admin</button>
+            </form>
+            <div style="margin-top: 0.75rem; text-align: center; font-size: 0.75rem; color: var(--gray-500);">
+                Demo: hunter / hunter_admin1234
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard">
+        <header class="compact-header" style="padding: 0.5rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <h1 style="font-size: 1.25rem; margin: 0;">Dashboard</h1>
+            <button id="logoutBtn" class="compact-btn compact-btn-outline" style="padding: 0.375rem 0.75rem; font-size: 0.875rem;">Logout</button>
+        </header>
+
+        <main class="main-content">
+            <div id="successMessage" class="success-message"></div>
+            <div id="errorMessage" class="error-message"></div>
+
+            <!-- Statistics -->
+            <div class="compact-stats-grid">
+                <div class="compact-stat-card">
+                    <div class="compact-stat-number" id="totalBookings">0</div>
+                    <div class="compact-stat-label">Total Bookings</div>
+                </div>
+                <div class="compact-stat-card">
+                    <div class="compact-stat-number" id="pendingBookings">0</div>
+                    <div class="compact-stat-label">Pending</div>
+                </div>
+                <div class="compact-stat-card">
+                    <div class="compact-stat-number" id="todayRevenue">TSh 0</div>
+                    <div class="compact-stat-label">Today's Revenue</div>
+                </div>
+                <div class="compact-stat-card">
+                    <div class="compact-stat-number" id="monthlyRevenue">TSh 0</div>
+                    <div class="compact-stat-label">Monthly Revenue</div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tab-navigation" style="margin-bottom:0.5rem;padding-bottom:0.25rem;border-bottom:1px solid var(--gray-200);gap:0.125rem">
+                <button class="tab-btn active" onclick="showTab('dashboardTab')" style="padding:0.5rem 1rem;font-size:0.875rem">Dashboard</button>
+                <button class="tab-btn" onclick="showTab('services')" style="padding:0.5rem 1rem;font-size:0.875rem">Services</button>
+                <button class="tab-btn" onclick="showTab('analytics')" style="padding:0.5rem 1rem;font-size:0.875rem">Analytics</button>
+                <button class="tab-btn" onclick="showTab('documents')" style="padding:0.5rem 1rem;font-size:0.875rem">Documents</button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboardTab" class="tab-content active">
+                <div class="content-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                    <!-- Bookings List -->
+                    <div class="bookings-section">
+                        <h2 class="section-title" style="font-size:1.125rem;margin-bottom:0.5rem;margin-top:0">Recent Bookings</h2>
+                        <div id="bookingsList">
+                            <!-- Bookings will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="compact-quick-actions" style="gap:0.5rem">
+                        <h2 class="section-title" style="font-size:1.125rem;margin-bottom:0.5rem;margin-top:0">Quick Actions</h2>
+                        <button class="compact-quick-action-item" onclick="refreshData()" style="padding:0.5rem;font-size:0.875rem">
+                            🔄 Refresh Data
+                        </button>
+                        <button class="compact-quick-action-item" onclick="exportBookings()" style="padding:0.5rem;font-size:0.875rem">
+                            📊 Export Bookings
+                        </button>
+                        <button class="compact-quick-action-item" onclick="viewCustomers()" style="padding:0.5rem;font-size:0.875rem">
+                            👥 View All Customers
+                        </button>
+                        <button class="compact-quick-action-item" onclick="generateReport()" style="padding:0.5rem;font-size:0.875rem">
+                            📄 Generate Report
+                        </button>
+                        <a href="../index.html" class="compact-quick-action-item" style="padding:0.5rem;font-size:0.875rem">
+                            🌐 View Website
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Management Tab -->
+            <div id="services" class="tab-content">
+                <div class="service-management">
+                    <h2 class="section-title" style="font-size:1.125rem;margin-bottom:0.5rem;margin-top:0">Service Management</h2>
+                    
+                    <!-- Add New Service -->
+                    <div class="compact-service-form" style="margin-bottom:0.75rem;padding:0.5rem;background:var(--gray-100);border-radius:var(--border-radius)">
+                        <input type="text" id="serviceName" placeholder="Service Name" style="padding:0.5rem;font-size:0.875rem" />
+                        <input type="number" id="servicePrice" placeholder="Price (TSh)" style="padding:0.5rem;font-size:0.875rem" />
+                        <button id="addServiceBtn" class="compact-btn compact-btn-primary" style="padding:0.5rem;font-size:0.875rem">Add Service</button>
+                    </div>
+                    
+                    <!-- Service List -->
+                    <div id="serviceList">
+                        <!-- Services will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics" class="tab-content">
+                <!-- Backup/Restore/Clear Controls -->
+                <div class="admin-backup-controls" style="margin-bottom: 1rem; display: flex; gap: 0.75rem;">
+                    <button id="backupDataBtn" aria-label="Backup all admin data" class="action-btn">Backup Data</button>
+                    <button id="restoreDataBtn" aria-label="Restore admin data from file" class="action-btn">Restore Data</button>
+                    <button id="clearDataBtn" aria-label="Clear all admin data" class="action-btn">Clear Data</button>
+                </div>
+                <div class="analytics-section">
+                    <h2 class="section-title" style="font-size:1.125rem;margin-bottom:0.5rem;margin-top:0">Analytics & Reports</h2>
+                    
+                    <!-- Charts -->
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="bookingsChart"></canvas>
+                    </div>
+                    
+                    <!-- Export Buttons -->
+                    <div class="export-buttons">
+                        <button class="export-btn" onclick="exportToPDF()">📄 Export PDF Report</button>
+                        <button class="export-btn" onclick="exportToExcel()">📊 Export Excel Report</button>
+                        <button class="export-btn" onclick="exportAnalytics()">📈 Export Analytics</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Tab (Estimates, Quotes, Proforma, Invoices) -->
+            <div id="documents" class="tab-content">
+                <div class="invoice-section">
+                    <h2 class="section-title" style="font-size:1.125rem;margin-bottom:0.5rem;margin-top:0">Documents</h2>
+                            <div id="documentsSyncControls" style="margin-left: auto; display:flex; gap:0.5rem; align-items:center;">
+                                <button id="syncBtnHeader" class="action-btn" onclick="syncDocuments()" title="Sync local documents to server">🔁 Sync</button>
+                                <div id="syncStatus" style="display:flex;align-items:center;gap:0.5rem;font-weight:600;color:#64748b;">
+                                    <span id="syncSpinner" style="display:none;width:16px;height:16px;border-radius:50%;border:2px solid rgba(0,178,255,0.2);border-top-color:#00B2FF;animation:spin 1s linear infinite"></span>
+                                    <span id="syncText">Idle</span>
+                                </div>
+                            </div>
+
+                    <!-- Document Controls -->
+                    <div class="invoice-form-section">
+                        <h3 style="margin:0 0 0.5rem 0;font-size:1rem">🗂️ Document Type</h3>
+                        <div class="form-row">
+                            <label for="docTypeSelect" class="visually-hidden">Document Type</label>
+                            <select id="docTypeSelect" aria-label="Select document type">
+                                <option value="estimate">Estimate</option>
+                                <option value="quote">Quotation</option>
+                                <option value="proforma">Proforma Invoice</option>
+                                <option value="invoice" selected>Invoice</option>
+                            </select>
+                            <label for="invoiceDate" class="visually-hidden">Invoice Date</label>
+                            <input type="date" id="invoiceDate" required aria-label="Select invoice date" />
+                            <div class="total-display">
+                                <strong>Total: TSh <span id="invoiceTotal">0</span></strong>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">Choose a document type, add customer and services, then generate and save. All documents persist locally until a DB is configured.</p>
+                    </div>
+
+                    <!-- Customer Selection -->
+                    <div class="invoice-form-section">
+                        <h3 style="margin:0 0 0.5rem 0;font-size:1rem">👤 Customer Information</h3>
+                        <div class="form-row">
+                            <label for="invoiceBooking" class="visually-hidden">Select Existing Customer</label>
+                            <select id="invoiceBooking" onchange="loadCustomerFromBooking()" aria-label="Select existing customer (optional)">
+                                <option value="">Select Existing Customer (Optional)</option>
+                            </select>
+                            <label for="invoiceCustomer" class="visually-hidden">Customer Name</label>
+                            <input type="text" id="invoiceCustomer" placeholder="Customer Name *" required aria-label="Enter customer name" />
+                        </div>
+                    </div>
+
+                    <!-- Service Selection -->
+                    <div class="invoice-form-section">
+                        <h3 style="margin:0 0 0.5rem 0;font-size:1rem">🔧 Service Selection</h3>
+                        <div id="serviceSelectionContainer">
+                            <!-- Services will be loaded here -->
+                        </div>
+                        <div class="selected-services">
+                            <h4>Selected Services:</h4>
+                            <div id="selectedServicesList">
+                                <p class="no-services">No services selected</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="invoice-form-section">
+                        <button class="action-btn" onclick="generateDocument()" id="generateInvoiceBtn" disabled>Generate & Save Document</button>
+                        <button class="export-btn" onclick="downloadInvoice()" style="display: none;" id="downloadInvoiceBtn">📄 Download PDF</button>
+                    </div>
+
+                    <!-- Documents List -->
+                    <div class="invoice-form-section">
+                        <h3>🗃️ Saved Documents</h3>
+                        <div id="documentsList">
+                            <p class="no-services">No documents yet.</p>
+                        </div>
+                    </div>
+
+                    <!-- Invoice Preview -->
+                    <div id="invoicePreview" class="invoice-preview" style="display: none;">
+                        <!-- Document preview will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="admin.js"></script>
+        <!-- Login modal -->
+        <div id="loginModal" class="modal" style="display:none">
+            <div class="modal-content">
+                <h3>Admin Login</h3>
+                <form id="loginModalForm" autocomplete="on">
+                    <div class="form-group">
+                        <label for="loginUser">Username</label>
+                        <input id="loginUser" type="text" name="username" placeholder="admin@example.com" autocomplete="username" />
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPass">Password</label>
+                        <input id="loginPass" type="password" name="password" placeholder="password" autocomplete="current-password" />
+                    </div>
+                    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+                        <button type="button" id="loginCancel" class="action-btn">Cancel</button>
+                        <button type="submit" id="loginSubmit" class="action-btn">Sign in</button>
+                    </div>
+                    <div id="loginError" class="message error" style="display:none;margin-top:8px"></div>
+                </form>
+            </div>
+        </div>
+    <script>
+        // --- Backend Auth Integration ---
+        function showDashboard() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('footer').style.display = 'block';
+        }
+        function showLogin() {
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('footer').style.display = 'none';
+        }
+        function showLoginError(msg) {
+            const el = document.getElementById('loginError');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 4000);
+        }
+        function checkAuth() {
+            if (localStorage.getItem('admin_jwt')) {
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        }
+        function setupEventListeners() {
+            document.getElementById('loginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                await window.adminLogin(username, password);
+                checkAuth();
+            });
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                window.adminLogout();
+                checkAuth();
+            });
+            
+            // Mobile menu handling is centralized in admin.js
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            setupEventListeners();
+        });
+    </script>
+    
+    <!-- Footer -->
+    <div id="footer" style="background: #1A1B25; color: white; padding: 2rem 0; text-align: center; margin-top: 2rem; display: none;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+            <p style="margin: 0 0 1rem 0; font-size: 0.9rem; opacity: 0.9;">
+                © 2024 Hunter Autoworks. All rights reserved. | Professional Automotive Service in Dar es Salaam
+            </p>
+            <p style="margin: 0; font-size: 0.8rem; opacity: 0.7;">
+                Powered by <a href="https://exrevolution.co.tz" target="_blank" style="color: #4CAF50; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#66BB6A'" onmouseout="this.style.color='#4CAF50'">EX REVOLUTION</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

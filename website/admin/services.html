@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Services — Hunter Auto</title>
+    <link rel="stylesheet" href="styles-clean.css" />
+    <script>
+      // Apply dark mode immediately to prevent flash
+      if (localStorage.getItem('appSettings')) {
+        const settings = JSON.parse(localStorage.getItem('appSettings'));
+        if (settings.darkMode) {
+          document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('dark-mode');
+          });
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" role="navigation">
+        <div class="brand"><div style="font-weight:900">Hunter Auto</div><div class="small">Admin</div></div>
+        <nav class="nav">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="documents.html">Documents</a>
+          <a href="invoices.html">Invoices</a>
+          <a href="clients.html">Clients</a>
+          <a href="services.html" class="active">Services</a>
+          <a href="reports.html">Reports</a>
+          <a href="settings.html">Settings</a>
+        </nav>
+      </aside>
+
+      <main class="main-area">
+        <header class="topbar">
+          <div class="left">
+            <button id="hamburger" class="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+            <h1 style="background:var(--gradient-primary);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent">🔧 Services</h1>
+          </div>
+          <div class="actions"><button id="btn-new-service" class="action-btn">➕ New Service</button></div>
+        </header>
+        <section style="padding:24px">
+          <div id="services-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px"></div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="mobile-overlay"></div>
+
+    <script src="admin.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded',()=>{
+        if (typeof loadServices === 'function') loadServices();
+      });
+    </script>
+  </body>
+</html>

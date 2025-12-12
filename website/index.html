@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HUNTER AUTOWORKS - Premium Automotive Excellence | Dar es Salaam</title>
+    <meta name="description" content="Experience premium automotive care in Dar es Salaam. Expert technicians, cutting-edge diagnostics, transparent pricing, and guaranteed satisfaction. Your vehicle deserves the best.">
+    <meta name="keywords" content="automotive repair, car service, Dar es Salaam, Tanzania, engine repair, brake service, oil change, transmission, professional mechanics">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Modern Header & Navigation */
+        .header {
+            background: rgba(26, 27, 37, 0.95);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .header.scrolled {
+            background: rgba(26, 27, 37, 0.98);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 0;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.2rem; /* Reduced from 1.5rem for better mobile sizing */
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px; /* Reduced from 8px */
+            color: #00B2FF;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem; /* Reduced from 2.5rem for better mobile fit */
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem; /* Reduced from 1rem for better mobile sizing */
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #00B2FF, #1A1B25);
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after {
+            width: 100%;
+        }
+
+        .nav-menu a:hover {
+            color: #00B2FF;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #00B2FF, #1A1B25);
+            color: white;
+            padding: 0.6rem 1.2rem; /* Reduced padding for better mobile sizing */
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem; /* Reduced from default for better mobile sizing */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0, 178, 255, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 178, 255, 0.4);
+        }
+
+        /* Stunning Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #1A1B25 0%, #1A1B25 50%, #00B2FF 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            padding-top: 80px; /* Added padding to account for fixed header */
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            padding: 0 2rem;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(0, 178, 255, 0.1);
+            border: 1px solid rgba(0, 178, 255, 0.3);
+            color: #00B2FF;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+
+        .hero-content .highlight {
+            background: linear-gradient(135deg, #00B2FF, #1A1B25);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            color: #cbd5e1;
+            font-weight: 400;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 4rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00B2FF, #1A1B25);
+            color: white;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 8px 25px rgba(0, 178, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1rem 2.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 178, 255, 0.4);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #00B2FF;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-label {
+            color: #cbd5e1;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Gallery Slider Section */
+        .gallery-section {
+            padding: 3.5rem 0;
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+        }
+
+        .gallery-container {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .gallery-slider {
+            position: relative;
+            height: 350px;
+            overflow: hidden;
+        }
+
+        .gallery-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .gallery-slide.active {
+            opacity: 1;
+        }
+
+        .slide-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide-content img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .slide-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 27, 37, 0.85);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1.2rem;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .slide-content:hover .slide-caption {
+            transform: translateY(0);
+        }
+
+        .slide-caption h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .slide-caption p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .slider-controls {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+            padding: 0 0.8rem;
+            pointer-events: none;
+        }
+
+        .slider-btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            cursor: pointer;
+            pointer-events: all;
+            transition: all 0.3s ease;
+        }
+
+        .slider-btn:hover {
+            background: rgba(0, 178, 255, 0.8);
+            transform: scale(1.05);
+        }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 1.2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: #00B2FF;
+            transform: scale(1.1);
+        }
+
+        .dot:hover {
+            background: #00B2FF;
+        }
+
+        /* Premium Services Section */
+        .services {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            position: relative;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.2rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-badge {
+            display: inline-block;
+            background: rgba(0, 178, 255, 0.1);
+            color: #00B2FF;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 0.8rem;
+            color: #0f172a;
+            line-height: 1.1;
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .service-card {
+            background: white;
+            padding: 1.5rem 1.2rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .service-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+        }
+
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00B2FF, #1A1B25);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 1.2rem;
+            box-shadow: 0 5px 15px rgba(0, 178, 255, 0.3);
+        }
+
+        .service-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #0f172a;
+        }
+
+        .service-card p {
+            color: #64748b;
+            margin-bottom: 1.2rem;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .service-features {
+            list-style: none;
+            margin-bottom: 1.2rem;
+            text-align: left;
+        }
+
+        .service-features li {
+            padding: 0.3rem 0;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+
+        .service-features li::before {
+            content: "✓";
+            color: #22c55e;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .service-price {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #00B2FF;
+            margin-bottom: 1rem;
+        }
+
+        .service-btn {
+            background: linear-gradient(135deg, #00B2FF, #1A1B25);
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.85rem;
+        }
+
+        .service-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 178, 255, 0.4);
+        }
+
+        /* Why Choose Us Section */
+        .why-choose {
+            padding: 6rem 0;
+            background: #1A1B25;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .why-choose::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="grad" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:rgba(255,107,53,0.1);stop-opacity:1" /><stop offset="100%" style="stop-color:rgba(255,107,53,0);stop-opacity:0" /></radialGradient></defs><circle cx="200" cy="200" r="300" fill="url(%23grad)"/><circle cx="800" cy="800" r="400" fill="url(%23grad)"/></svg>');
+            animation: float 15s ease-in-out infinite;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00B2FF, #1A1B25);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 1.2rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            color: white;
+        }
+
+        .feature-card p {
+            color: #cbd5e1;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .testimonial-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: -8px;
+            left: 15px;
+            font-size: 3rem;
+            color: #00B2FF;
+            font-weight: bold;
+        }
+
+        .testimonial-text {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #475569;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #00B2FF, #1A1B25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .author-info h4 {
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.2rem;
+        }
+
+        .author-info p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .stars {
+            color: #fbbf24;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* About Section */
+        .about {
+            padding: 4rem 0;
+            background: white;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .about-text h2 {
+            font-size: 2.2rem;
+            margin-bottom: 1.2rem;
+            color: #1A1B25;
+        }
+
+        .about-text p {
+            font-size: 1rem;
+            margin-bottom: 1.2rem;
+            color: #666;
+        }
+
+        .features-list {
+            list-style: none;
+        }
+
+        .features-list li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .features-list li::before {
+            content: "✅";
+            font-size: 1.2rem;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 4rem 0;
+            background: #1A1B25;
+            color: white;
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .contact-info h3 {
+            font-size: 1.6rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+        }
+
+        .contact-form {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1A1B25;
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+                justify-content: center;
+            }
+            
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(26, 27, 37, 0.98);
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+                z-index: 1001; /* Ensure menu appears above other content */
+            }
+            
+            .nav-menu.show {
+                display: flex;
+            }
+            
+            .logo {
+                font-size: 1.1rem; /* Further reduced for mobile */
+                gap: 5px;
+                justify-content: center;
+                width: 100%;
+            }
+            
+            #mobileMenuBtn {
+                display: block !important;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1.8rem;
+                cursor: pointer;
+                padding: 0;
+                margin: 0;
+                line-height: 1;
+            }
+
+            .hero-content h1 {
+                font-size: 1.8rem; /* Reduced from 2.5rem for better mobile readability */
+                line-height: 1.2;
+            }
+
+            .hero-content p {
+                font-size: 0.95rem; /* Reduced from 1.4rem for better mobile readability */
+                padding: 0 1rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem; /* Reduced from default */
+            }
+
+            .btn-primary, .btn-secondary {
+                padding: 0.7rem 1.3rem; /* Reduced padding for mobile */
+                font-size: 0.85rem; /* Reduced font size for mobile */
+                width: 80%; /* Make buttons more proportional on mobile */
+                max-width: 300px;
+            }
+
+            .about-content,
+            .contact-content {
+                grid-template-columns: 1fr;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem; /* Reduced gap for mobile */
+            }
+            
+            .service-card {
+                padding: 1.2rem 1rem; /* Reduced padding for mobile */
+            }
+            
+            .section-title {
+                font-size: 1.5rem; /* Reduced from 3.5rem for mobile */
+            }
+            
+            .section-subtitle {
+                font-size: 0.85rem; /* Reduced from 1.3rem for mobile */
+            }
+            
+            .hero-stats {
+                grid-template-columns: repeat(2, 1fr); /* 2 columns instead of auto-fit for mobile */
+                gap: 1rem;
+            }
+            
+            .stat-number {
+                font-size: 1.6rem; /* Reduced from 2.5rem for mobile */
+            }
+            
+            .stat-label {
+                font-size: 0.75rem; /* Reduced from 0.9rem for mobile */
+            }
+            
+            /* Gallery Slider Responsive */
+            .gallery-slider {
+                height: 280px;
+            }
+            
+            .slide-caption {
+                background: rgba(26, 27, 37, 0.85);
+                -webkit-backdrop-filter: blur(10px);
+                backdrop-filter: blur(10px);
+                padding: 0.7rem;
+            }
+            
+            .slide-caption h3 {
+                font-size: 1rem;
+            }
+            
+            .slide-caption p {
+                font-size: 0.8rem;
+            }
+            
+            .slider-btn {
+                width: 30px;
+                height: 30px;
+                font-size: 1rem;
+            }
+            
+            .slider-dots {
+                bottom: 0.6rem;
+            }
+            
+            .dot {
+                width: 6px;
+                height: 6px;
+            }
+            
+            .features-grid {
+                gap: 1.5rem;
+                margin-top: 2rem;
+            }
+            
+            .feature-card {
+                background: rgba(255, 255, 255, 0.05);
+                -webkit-backdrop-filter: blur(10px);
+                backdrop-filter: blur(10px);
+                padding: 1.5rem;
+            }
+            
+            .testimonials-grid {
+                margin-top: 1.5rem;
+                gap: 1.2rem;
+            }
+            
+            .testimonial-card {
+                padding: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-container {
+                padding: 0 1rem; /* Reduced padding for smaller screens */
+            }
+            
+            .container {
+                padding: 0 0.8rem;
+            }
+            
+            .logo {
+                font-size: 1.1rem; /* Further reduced for small screens */
+                gap: 4px;
+                justify-content: center;
+                width: 100%;
+            }
+            
+            .hero-content h1 {
+                font-size: 1.6rem; /* Further reduced for small screens */
+            }
+            
+            .hero-badge {
+                font-size: 0.75rem; /* Reduced from 0.9rem */
+                padding: 0.3rem 0.8rem;
+            }
+            
+            .section-title {
+                font-size: 1.3rem; /* Further reduced for small screens */
+            }
+            
+            .section-subtitle {
+                font-size: 0.8rem; /* Further reduced for small screens */
+            }
+            
+            .hero-stats {
+                grid-template-columns: 1fr; /* Single column on very small screens */
+            }
+            
+            /* Gallery Slider Extra Small Screens */
+            .gallery-slider {
+                height: 220px;
+            }
+            
+            .slide-caption {
+                background: rgba(26, 27, 37, 0.85);
+                -webkit-backdrop-filter: blur(10px);
+                backdrop-filter: blur(10px);
+            }
+            
+            .slide-caption h3 {
+                font-size: 0.9rem;
+            }
+            
+            .slide-caption p {
+                font-size: 0.75rem;
+            }
+            
+            .slider-btn {
+                width: 25px;
+                height: 25px;
+                font-size: 0.9rem;
+            }
+            
+            .slider-dots {
+                bottom: 0.5rem;
+            }
+            
+            .dot {
+                width: 5px;
+                height: 5px;
+            }
+            
+            .services-grid {
+                gap: 0.8rem;
+            }
+            
+            .service-card {
+                padding: 1rem 0.8rem;
+            }
+            
+            .features-grid {
+                gap: 1.2rem;
+            }
+            
+            .feature-card {
+                background: rgba(255, 255, 255, 0.05);
+                -webkit-backdrop-filter: blur(10px);
+                backdrop-filter: blur(10px);
+                padding: 1.2rem;
+            }
+            
+            .testimonials-grid {
+                margin-top: 1.5rem;
+                gap: 1rem;
+            }
+            
+            .testimonial-card {
+                padding: 1rem;
+            }
+            
+            .testimonial-text {
+                font-size: 0.9rem;
+                margin-bottom: 1rem;
+            }
+            
+            .author-avatar {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9rem;
+            }
+            
+            .author-info h4 {
+                font-size: 0.9rem;
+            }
+            
+            .author-info p {
+                font-size: 0.8rem;
+            }
+            
+            .stars {
+                font-size: 1rem;
+                margin-bottom: 0.8rem;
+            }
+        }
+
+        /* Floating Action Buttons */
+        .floating-actions {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .floating-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .floating-btn.whatsapp {
+            background: #25d366;
+        }
+
+        .floating-btn.phone {
+            background: #00B2FF;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="images/logo.jpg" alt="Hunter Autoworks" style="height: 25px; width: auto; margin-right: 6px;">
+                <span style="font-size: 1.2rem;">HUNTER AUTOWORKS</span>
+            </div>
+            <nav aria-label="Main Navigation">
+                <button id="mobileMenuBtn" aria-label="Open navigation menu" aria-controls="mainNav" aria-expanded="false" style="display:none;background:none;border:none;color:white;font-size:1.8rem;cursor:pointer;line-height:1;">
+                    ☰
+                </button>
+                <ul class="nav-menu" id="mainNav" role="menubar">
+                    <li role="none"><a role="menuitem" href="#home">Home</a></li>
+                    <li role="none"><a role="menuitem" href="#services">Services</a></li>
+                    <li role="none"><a role="menuitem" href="#about">About</a></li>
+                    <li role="none"><a role="menuitem" href="#contact">Contact</a></li>
+                    <li role="none"><a role="menuitem" href="booking.html">Book Service</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">Your Trusted Automotive Service Partner in Dar es Salaam</div>
+            <h1>Premium <span class="highlight">Automotive Excellence</span> Redefined</h1>
+            <p>Experience the pinnacle of automotive care with cutting-edge diagnostics, expert craftsmanship, and unmatched customer service.</p>
+            <div class="hero-buttons">
+                <a href="booking.html" class="btn-primary">Book Premium Service</a>
+                <a href="#services" class="btn-secondary">Explore Services</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number">10+</div>
+                    <div class="stat-label">Years Excellence</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">5000+</div>
+                    <div class="stat-label">Happy Customers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">Satisfaction Rate</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Emergency Support</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Slider Section -->
+    <section class="gallery-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge">🖼️ Our Work Gallery</div>
+                <h2 class="section-title">Premium Automotive Services Showcase</h2>
+                <p class="section-subtitle">Explore our expert craftsmanship and state-of-the-art facilities</p>
+            </div>
+            
+            <div class="gallery-container">
+                <div class="gallery-slider">
+                    <div class="gallery-slide active">
+                        <div class="slide-content">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'><rect width='600' height='400' fill='%2300B2FF'/><text x='50%' y='50%' font-family='Arial' font-size='24' fill='white' text-anchor='middle' dy='.3em'>Professional Workshop</text></svg>" alt="Professional automotive workshop">
+                            <div class="slide-caption">
+                                <h3>State-of-the-Art Facility</h3>
+                                <p>Modern equipment and expert technicians</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-slide">
+                        <div class="slide-content">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'><rect width='600' height='400' fill='%231A1B25'/><text x='50%' y='50%' font-family='Arial' font-size='24' fill='white' text-anchor='middle' dy='.3em'>Engine Diagnostics</text></svg>" alt="Engine diagnostics service">
+                            <div class="slide-caption">
+                                <h3>Advanced Diagnostics</h3>
+                                <p>Cutting-edge computer diagnostics</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-slide">
+                        <div class="slide-content">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'><rect width='600' height='400' fill='%2322c55e'/><text x='50%' y='50%' font-family='Arial' font-size='24' fill='white' text-anchor='middle' dy='.3em'>Brake Service</text></svg>" alt="Brake service">
+                            <div class="slide-caption">
+                                <h3>Brake Service</h3>
+                                <p>Complete brake system maintenance</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-slide">
+                        <div class="slide-content">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'><rect width='600' height='400' fill='%23f59e0b'/><text x='50%' y='50%' font-family='Arial' font-size='24' fill='white' text-anchor='middle' dy='.3em'>Oil Change</text></svg>" alt="Oil change service">
+                            <div class="slide-caption">
+                                <h3>Oil Change</h3>
+                                <p>Premium synthetic oils and filters</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-slide">
+                        <div class="slide-content">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'><rect width='600' height='400' fill='%238b5cf6'/><text x='50%' y='50%' font-family='Arial' font-size='24' fill='white' text-anchor='middle' dy='.3em'>AC Service</text></svg>" alt="AC service">
+                            <div class="slide-caption">
+                                <h3>Air Conditioning</h3>
+                                <p>Complete AC system service</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="slider-controls">
+                    <button class="slider-btn prev-btn" aria-label="Previous slide">❮</button>
+                    <button class="slider-btn next-btn" aria-label="Next slide">❯</button>
+                </div>
+                
+                <div class="slider-dots">
+                    <span class="dot active" data-slide="0"></span>
+                    <span class="dot" data-slide="1"></span>
+                    <span class="dot" data-slide="2"></span>
+                    <span class="dot" data-slide="3"></span>
+                    <span class="dot" data-slide="4"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge">🔧 Premium Services</div>
+                <h2 class="section-title">Comprehensive Automotive Solutions</h2>
+                <p class="section-subtitle">From routine maintenance to complex repairs, we deliver excellence in every service with state-of-the-art equipment and expert technicians.</p>
+            </div>
+            <div class="services-grid" id="servicesGrid">
+                <!-- Services will be loaded here dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section class="why-choose">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge">⭐ Why Choose Hunter</div>
+                <h2 class="section-title" style="color: white;">The Hunter Autoworks Advantage</h2>
+                <p class="section-subtitle" style="color: #cbd5e1;">Experience the difference that sets us apart from ordinary automotive services.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🏆</div>
+                    <h3>Certified Excellence</h3>
+                    <p>Our ASE-certified technicians bring years of expertise and continuous training to every service.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔬</div>
+                    <h3>Advanced Technology</h3>
+                    <p>State-of-the-art diagnostic equipment ensures accurate problem identification and efficient repairs.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💎</div>
+                    <h3>Premium Parts</h3>
+                    <p>We use only OEM and premium aftermarket parts to ensure longevity and optimal performance.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Service Warranty</h3>
+                    <p>Every service comes with our comprehensive warranty for your complete peace of mind.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Fast Turnaround</h3>
+                    <p>Efficient service processes mean you get back on the road quickly without compromising quality.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Transparent Pricing</h3>
+                    <p>No hidden fees, no surprises. You'll know exactly what you're paying for before we start.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge">💬 Customer Stories</div>
+                <h2 class="section-title">What Our Customers Say</h2>
+                <p class="section-subtitle">Don't just take our word for it. Here's what our satisfied customers have to say about their Hunter Autoworks experience.</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">Hunter Autoworks transformed my old Toyota into a reliable daily driver. Their attention to detail and honest pricing is unmatched in Dar es Salaam. I wouldn't trust my car to anyone else!</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">JM</div>
+                        <div class="author-info">
+                            <h4>John Mwalimu</h4>
+                            <p>Business Owner</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">Professional service from start to finish. They diagnosed my engine problem quickly and fixed it at a fair price. The photo updates during service were a nice touch!</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">SK</div>
+                        <div class="author-info">
+                            <h4>Sarah Kimaro</h4>
+                            <p>Teacher</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">Best automotive service in the city! They saved me thousands by properly diagnosing the real issue instead of just replacing parts. Highly recommended!</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">DM</div>
+                        <div class="author-info">
+                            <h4>David Moshi</h4>
+                            <p>Engineer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>Why Choose Hunter Autoworks?</h2>
+                    <p>With over 10 years of experience serving Dar es Salaam, we've built our reputation on honest service, expert craftsmanship, and customer satisfaction.</p>
+                    <ul class="features-list">
+                        <li>Certified and experienced technicians</li>
+                        <li>Modern diagnostic equipment</li>
+                        <li>Transparent pricing - no hidden fees</li>
+                        <li>Quality parts and materials</li>
+                        <li>Service warranty included</li>
+                        <li>Mobile payment options</li>
+                        <li>Free estimates and consultations</li>
+                    </ul>
+                </div>
+                <div class="about-image">
+                    <div style="background: #f0f0f0; height: 400px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #666;">
+                        🏭 Professional Workshop
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title" style="color: white;">Get In Touch</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>Contact Information</h3>
+                    <div class="contact-item">
+                        <span>📍</span>
+                        <span>Dar es Salaam, Tanzania</span>
+                    </div>
+                    <div class="contact-item">
+                        <span>📞</span>
+                        <span>+255 627 629 345</span>
+                    </div>
+                    <div class="contact-item">
+                        <span>📧</span>
+                        <span>info@hunterautoworks.co.tz</span>
+                    </div>
+                    <div class="contact-item">
+                        <span>🕐</span>
+                        <span>Mon-Sat: 8:00 AM - 6:00 PM</span>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <h3>Quick Quote Request</h3>
+                    <form id="quoteForm">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vehicle">Vehicle (Make/Model/Year)</label>
+                            <input type="text" id="vehicle" name="vehicle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="service">Service Needed</label>
+                            <select id="service" name="service" required aria-required="true">
+                                <option value="">Select Service</option>
+                                <!-- Options will be loaded dynamically -->
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Additional Details</label>
+                            <textarea id="message" name="message" placeholder="Describe the issue or service needed..."></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary" style="width: 100%;">Request Quote</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Hunter Autoworks. All rights reserved. | Professional Automotive Service in Dar es Salaam</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; opacity: 0.7;">
+                Powered by <a href="https://exrevolution.co.tz" target="_blank" style="color: #4CAF50; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#66BB6A'" onmouseout="this.style.color='#4CAF50'">EX REVOLUTION</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Floating Action Buttons -->
+    <div class="floating-actions">
+        <button class="floating-btn whatsapp" onclick="openWhatsApp()" title="WhatsApp">💬</button>
+        <button class="floating-btn phone" onclick="makeCall()" title="Call Us">📞</button>
+    </div>
+
+    <script>
+        // Mobile menu toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const navMenu = document.getElementById('mainNav');
+            const header = document.querySelector('.header');
+            
+            function toggleMobileMenu() {
+                const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+                mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
+                if (isExpanded) {
+                    navMenu.classList.remove('show');
+                    navMenu.style.display = 'none';
+                } else {
+                    navMenu.classList.add('show');
+                    navMenu.style.display = 'flex';
+                    navMenu.style.flexDirection = 'column';
+                }
+            }
+            
+            function closeMobileMenu() {
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                navMenu.classList.remove('show');
+                navMenu.style.display = 'none';
+            }
+            
+            if (mobileMenuBtn && navMenu) {
+                mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+                
+                // Close menu when clicking outside the header
+                document.addEventListener('click', function(event) {
+                    // Check if the click was outside the header
+                    if (!header.contains(event.target) && navMenu.classList.contains('show')) {
+                        closeMobileMenu();
+                    }
+                });
+                
+                // Close menu when clicking on a link
+                const navLinks = navMenu.querySelectorAll('a');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        // Add a small delay to ensure navigation works before closing
+                        setTimeout(closeMobileMenu, 100);
+                    });
+                });
+            }
+            
+            // Handle window resize
+            function handleResize() {
+                if (window.innerWidth > 768) {
+                    closeMobileMenu();
+                    if (navMenu) {
+                        // Remove inline styles to let CSS handle display property
+                        navMenu.style.display = '';
+                        navMenu.style.flexDirection = '';
+                    }
+                } else {
+                    // On mobile, ensure menu is hidden by default
+                    if (navMenu && !navMenu.classList.contains('show')) {
+                        navMenu.style.display = 'none';
+                    }
+                }
+            }
+            
+            window.addEventListener('resize', handleResize);
+            handleResize(); // Call on initial load
+        });
+
+        // Dynamically load services from backend API for Services section and Contact form
+    window.API_BASE = window.API_BASE || 'http://localhost:5001/api'; // Change to your deployed backend URL
+    const API_BASE = window.API_BASE;
+        async function getServices() {
+            try {
+                const res = await fetch(`${API_BASE}/services`);
+                if (!res.ok) throw new Error('Network');
+                const services = await res.json();
+                if (!Array.isArray(services) || services.length === 0) throw new Error('No services');
+                return services;
+            } catch {
+                // Fallback default
+                return [
+                    { name: 'Engine Diagnostics', price: 15000, icon: '🔍', desc: 'Cutting-edge computer diagnostics to identify issues with precision and accuracy.', features: ['OBD-II scanning','Engine performance analysis','Electrical system testing','Detailed diagnostic report'] },
+                    { name: 'Oil Change & Filter', price: 35000, icon: '🛢️', desc: 'Complete oil change with premium synthetic oils and high-quality filters.', features: ['Synthetic oil options','Multi-point inspection','Fluid level checks','Service reminder sticker'] },
+                    { name: 'Brake Service', price: 45000, icon: '🛑', desc: 'Complete brake system service ensuring your safety on the road.', features: ['Brake pad replacement','Rotor resurfacing','Brake fluid service','Safety inspection'] },
+                    { name: 'Transmission Service', price: 80000, icon: '⚙️', desc: 'Expert transmission service and repair by certified specialists.', features: ['Transmission flush','Filter replacement','Performance testing','Warranty included'] },
+                    { name: 'AC Service', price: 25000, icon: '❄️', desc: 'Professional AC service to keep you comfortable year-round.', features: ['Refrigerant recharge','System leak detection','Component replacement','Performance optimization'] },
+                    { name: 'General Maintenance', price: 40000, icon: '🔧', desc: 'Comprehensive vehicle maintenance to keep your car running perfectly.', features: ['Multi-point inspection','Preventive maintenance','Fluid services','Performance optimization'] }
+                ];
+            }
+        }
+        async function renderServices() {
+            const services = await getServices();
+            const grid = document.getElementById('servicesGrid');
+            if (!grid) return;
+            grid.innerHTML = services.map(service => `
+                <div class="service-card">
+                    <div class="service-icon">${service.icon || '🔧'}</div>
+                    <h3>${service.name}</h3>
+                    <p>${service.desc || ''}</p>
+                    <ul class="service-features">
+                        ${(service.features||[]).map(f=>`<li>${f}</li>`).join('')}
+                    </ul>
+                    <div class="service-price">From TSh ${service.price.toLocaleString()}</div>
+                    <a href="booking.html" class="service-btn">Book Now</a>
+                </div>
+            `).join('');
+        }
+        async function renderServiceOptions() {
+            const services = await getServices();
+            const select = document.getElementById('service');
+            if (!select) return;
+            // Remove all except the first and last ("Select Service" and "Other")
+            while (select.options.length > 1) select.remove(1);
+            services.forEach(service => {
+                const opt = document.createElement('option');
+                opt.value = service.name;
+                opt.textContent = service.name;
+                select.insertBefore(opt, select.lastElementChild);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            renderServices();
+            renderServiceOptions();
+        });
+
+        // Quote form submission with backend integration
+        document.getElementById('quoteForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            try {
+                const response = await fetch(`${API_BASE}/quotes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) throw new Error('Network error');
+                alert('Thank you! Your quote request has been submitted. We will contact you within 2 hours.');
+            } catch (err) {
+                // Fallback to localStorage
+                localStorage.setItem('quoteRequest_' + Date.now(), JSON.stringify(data));
+                alert('Thank you! Your quote request has been submitted. We will contact you within 2 hours.');
+            }
+            this.reset();
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Floating action buttons
+        function openWhatsApp() {
+            window.open('https://wa.me/255627629345?text=Hello HUNTER AUTOWORKS, I need automotive service.', '_blank');
+        }
+
+        function makeCall() {
+            window.location.href = 'tel:+255627629345';
+        }
+
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(26, 27, 37, 0.95)';
+                header.style.webkitBackdropFilter = 'blur(10px)';
+                header.style.backdropFilter = 'blur(10px)';
+            } else {
+                header.style.background = 'rgba(26, 27, 37, 0.95)';
+                header.style.webkitBackdropFilter = 'blur(20px)';
+                header.style.backdropFilter = 'blur(20px)';
+            }
+        });
+        
+        // Gallery Slider Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.gallery-slide');
+            const dots = document.querySelectorAll('.dot');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            let currentSlide = 0;
+            let slideInterval;
+            
+            // Show a specific slide
+            function showSlide(index) {
+                // Hide all slides
+                slides.forEach(slide => slide.classList.remove('active'));
+                dots.forEach(dot => dot.classList.remove('active'));
+                
+                // Show the selected slide
+                slides[index].classList.add('active');
+                dots[index].classList.add('active');
+                
+                currentSlide = index;
+            }
+            
+            // Next slide
+            function nextSlide() {
+                let next = currentSlide + 1;
+                if (next >= slides.length) {
+                    next = 0;
+                }
+                showSlide(next);
+            }
+            
+            // Previous slide
+            function prevSlide() {
+                let prev = currentSlide - 1;
+                if (prev < 0) {
+                    prev = slides.length - 1;
+                }
+                showSlide(prev);
+            }
+            
+            // Start auto slide
+            function startSlideShow() {
+                slideInterval = setInterval(nextSlide, 5000); // Change slide every 5 seconds
+            }
+            
+            // Stop auto slide
+            function stopSlideShow() {
+                clearInterval(slideInterval);
+            }
+            
+            // Event listeners
+            if (prevBtn) prevBtn.addEventListener('click', function() {
+                stopSlideShow();
+                prevSlide();
+                startSlideShow();
+            });
+            
+            if (nextBtn) nextBtn.addEventListener('click', function() {
+                stopSlideShow();
+                nextSlide();
+                startSlideShow();
+            });
+            
+            // Dot click events
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', function() {
+                    stopSlideShow();
+                    showSlide(index);
+                    startSlideShow();
+                });
+            });
+            
+            // Start the slideshow
+            startSlideShow();
+            
+            // Pause slideshow on hover
+            const galleryContainer = document.querySelector('.gallery-container');
+            if (galleryContainer) {
+                galleryContainer.addEventListener('mouseenter', stopSlideShow);
+                galleryContainer.addEventListener('mouseleave', startSlideShow);
+            }
+        });
+    </script>
+</body>
+</html>

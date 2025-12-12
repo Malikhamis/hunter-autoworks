@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Admin — Dashboard</title>
+    <link rel="stylesheet" href="styles-clean.css">
+    <script>
+      // Apply dark mode immediately to prevent flash
+      if (localStorage.getItem('appSettings')) {
+        const settings = JSON.parse(localStorage.getItem('appSettings'));
+        if (settings.darkMode) {
+          document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('dark-mode');
+          });
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" role="navigation" aria-label="Main navigation">
+        <div class="brand">
+          <img src="../images/logo.jpg" alt="logo" width="36" height="36" onerror="this.style.display='none'" />
+          <div>
+            <div style="font-weight:900">Hunter Auto</div>
+            <div class="small">Admin</div>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <a href="dashboard.html" class="active">Dashboard</a>
+          <a href="documents.html">Documents</a>
+          <a href="invoices.html">Invoices</a>
+          <a href="clients.html">Clients</a>
+          <a href="services.html">Services</a>
+          <a href="reports.html">Reports</a>
+          <a href="settings.html">Settings</a>
+        </nav>
+
+        <div class="small">v1.0 · Local-first · Supabase</div>
+      </aside>
+
+      <main class="main-area">
+        <header class="topbar">
+          <div class="left">
+            <button id="hamburger" class="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+            <h1 style="font-size:1.125rem;margin:0">🏢 Hunter Auto Admin</h1>
+          </div>
+          <div class="actions"><button id="logoutBtn" class="logout-btn" style="padding:8px 16px;font-size:0.875rem">Logout</button></div>
+        </header>
+
+        <section class="container" style="padding:24px;max-width:1600px">
+          <!-- Header Section with Actions -->
+          <div class="top" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <div>
+              <h2 style="margin:0;font-size:1.5rem;font-weight:800;background:var(--gradient-primary);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Admin Dashboard</h2>
+              <p style="margin:4px 0 0;color:var(--text-muted);font-size:0.875rem">Welcome back! Here's your business overview</p>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button id="btn-sync" class="action-btn" style="background:var(--gradient-success);padding:8px 16px;font-size:0.875rem">🔄 Sync</button>
+              <button id="btn-new" class="action-btn" style="padding:8px 16px;font-size:0.875rem">➕ New</button>
+            </div>
+          </div>
+
+          <!-- Main Content Grid: Stats on Left, Actions/Recent on Right -->
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:24px">
+            <!-- Left Column: Stats -->
+            <div>
+              <div class="stats-grid" style="grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:0">
+                <div class="stat-card fade-in">
+                  <div class="icon-container" style="margin-bottom:12px;width:40px;height:40px;font-size:1.25rem">📋</div>
+                  <div class="stat-number" id="totalBookings" style="font-size:2rem">0</div>
+                  <div class="stat-label">Total Bookings</div>
+                </div>
+                <div class="stat-card fade-in" style="animation-delay:0.1s">
+                  <div class="icon-container icon-container-warning" style="margin-bottom:12px;width:40px;height:40px;font-size:1.25rem">⏳</div>
+                  <div class="stat-number" id="pendingBookings" style="font-size:2rem">0</div>
+                  <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card fade-in" style="animation-delay:0.2s">
+                  <div class="icon-container icon-container-success" style="margin-bottom:12px;width:40px;height:40px;font-size:1.25rem">💰</div>
+                  <div class="stat-number" id="todayRevenue" style="font-size:2rem">TSh 0</div>
+                  <div class="stat-label">Today's Revenue</div>
+                </div>
+                <div class="stat-card fade-in" style="animation-delay:0.3s">
+                  <div class="icon-container icon-container-purple" style="margin-bottom:12px;width:40px;height:40px;font-size:1.25rem">📊</div>
+                  <div class="stat-number" id="monthlyRevenue" style="font-size:2rem">TSh 0</div>
+                  <div class="stat-label">Monthly Revenue</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Quick Actions -->
+            <div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <a href="invoices.html" class="card" style="text-decoration:none;color:inherit;cursor:pointer;text-align:center;padding:20px">
+                  <div class="icon-container" style="margin:0 auto 8px;width:40px;height:40px;font-size:1.25rem">📝</div>
+                  <div style="font-weight:600;color:var(--text-primary);font-size:0.875rem">Create Invoice</div>
+                </a>
+                <a href="clients.html" class="card" style="text-decoration:none;color:inherit;cursor:pointer;text-align:center;padding:20px">
+                  <div class="icon-container icon-container-success" style="margin:0 auto 8px;width:40px;height:40px;font-size:1.25rem">👥</div>
+                  <div style="font-weight:600;color:var(--text-primary);font-size:0.875rem">Manage Clients</div>
+                </a>
+                <a href="services.html" class="card" style="text-decoration:none;color:inherit;cursor:pointer;text-align:center;padding:20px">
+                  <div class="icon-container icon-container-warning" style="margin:0 auto 8px;width:40px;height:40px;font-size:1.25rem">🔧</div>
+                  <div style="font-weight:600;color:var(--text-primary);font-size:0.875rem">View Services</div>
+                </a>
+                <a href="reports.html" class="card" style="text-decoration:none;color:inherit;cursor:pointer;text-align:center;padding:20px">
+                  <div class="icon-container icon-container-purple" style="margin:0 auto 8px;width:40px;height:40px;font-size:1.25rem">📈</div>
+                  <div style="font-weight:600;color:var(--text-primary);font-size:0.875rem">View Reports</div>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Invoices Section - Full Width -->
+          <div class="card card-premium fade-in" style="animation-delay:0.4s">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+              <h3 style="margin:0;font-size:1.125rem;font-weight:700;color:var(--text-primary)">📄 Recent Invoices</h3>
+              <span class="badge badge-primary" id="invoiceCount">0</span>
+            </div>
+            <div id="recentInvoices" style="display:flex;flex-direction:column;gap:12px"></div>
+          </div>
+
+          <div id="successMessage" class="message success" style="display:none"></div>
+          <div id="errorMessage" class="message error" style="display:none"></div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="mobile-overlay"></div>
+
+    <script src="admin.js"></script>
+    <script>
+      async function loadOverview() {
+        try {
+          const res = await fetch('http://localhost:5000/api/dashboard/overview');
+          if (res.ok) {
+            const data = await res.json();
+            document.getElementById('overdueCount')?.textContent = data.overdue?.overdue_count || 0;
+            document.getElementById('overdueTotal')?.textContent = (data.overdue?.overdue_total || 0).toLocaleString();
+            document.getElementById('issuedCount')?.textContent = data.issued?.issued_count || 0;
+          } else throw new Error('API not available');
+        } catch (e) {
+          const docs = JSON.parse(localStorage.getItem('documents') || '[]');
+          const overdue = docs.filter(d => d.type === 'invoice' && d.meta && d.meta.status === 'overdue');
+          const overdueTotal = overdue.reduce((s, d) => s + (d.services || []).reduce((ss,it)=>ss + (it.quantity*it.unit_price_tsh||0),0), 0);
+          document.getElementById('overdueCount')?.textContent = overdue.length;
+          document.getElementById('overdueTotal')?.textContent = overdueTotal.toLocaleString();
+          document.getElementById('issuedCount')?.textContent = docs.filter(d => d.type === 'invoice').length;
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        // wire existing functions if present
+        if (typeof loadOverview === 'function') loadOverview();
+        const docs = JSON.parse(localStorage.getItem('documents') || '[]').filter(d => d.type === 'invoice');
+        const recent = docs.slice(-10).reverse();
+        const el = document.getElementById('recentInvoices');
+        const countEl = document.getElementById('invoiceCount');
+        
+        if (countEl) countEl.textContent = docs.length;
+        
+        if (el) {
+          if (recent.length === 0) {
+            el.innerHTML = `
+              <div class="empty-state" style="padding:40px 20px">
+                <div class="empty-state-icon">📄</div>
+                <h3 class="empty-state-title">No invoices yet</h3>
+                <p class="empty-state-description">Create your first invoice to get started</p>
+                <a href="invoices.html" class="action-btn">Create Invoice</a>
+              </div>
+            `;
+          } else {
+            el.innerHTML = '';
+            recent.forEach(d => {
+              const total = (d.services||[]).reduce((s,it)=>s + (it.quantity*it.unit_price_tsh||0),0);
+              const status = d.meta?.status || 'unpaid';
+              const statusClass = status === 'paid' ? 'status-paid' : status === 'overdue' ? 'status-overdue' : 'status-unpaid';
+              const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+              
+              const row = document.createElement('div');
+              row.className = 'slide-in';
+              row.style.cssText = 'padding:16px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;transition:all 0.2s ease;cursor:pointer';
+              row.onmouseover = () => { row.style.background = 'var(--gray-100)'; row.style.transform = 'translateX(4px)'; };
+              row.onmouseout = () => { row.style.background = 'var(--surface-2)'; row.style.transform = 'translateX(0)'; };
+              
+              row.innerHTML = `
+                <div style="flex:1">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                    <strong style="font-size:0.875rem;color:var(--text-primary)">${d.doc_id}</strong>
+                    <span class="status-indicator ${statusClass}" style="font-size:0.75rem">${statusText}</span>
+                  </div>
+                  <div style="font-size:0.875rem;color:var(--text-muted)">👤 ${d.customer}</div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-size:1.125rem;font-weight:700;color:var(--primary)">TSh ${total.toLocaleString()}</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted)">${new Date(d.date || Date.now()).toLocaleDateString()}</div>
+                </div>
+              `;
+              el.appendChild(row);
+            });
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

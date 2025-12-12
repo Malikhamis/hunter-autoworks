@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Service - HUNTER AUTOWORKS</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #00B2FF 0%, #1A1B25 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #00B2FF 0%, #1A1B25 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .booking-form {
+            padding: 2rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section h3 {
+            color: #1A1B25;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00B2FF;
+            box-shadow: 0 0 0 3px rgba(0, 178, 255, 0.1);
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .service-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-option {
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            background: #f8f9fa;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .service-option:hover {
+            border-color: #00B2FF;
+            background: #f0f8ff;
+            transform: translateY(-2px);
+        }
+
+        .service-option.selected {
+            border-color: #00B2FF;
+            background: rgba(0, 178, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 178, 255, 0.15);
+        }
+
+        .service-option .icon {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .service-option .name {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .service-option .price {
+            color: #00B2FF;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .date-time-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .time-slot {
+            padding: 0.5rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .time-slot:hover {
+            border-color: #00B2FF;
+            background: #f8f9fa;
+        }
+
+        .time-slot.selected {
+            border-color: #00B2FF;
+            background: #00B2FF;
+            color: white;
+        }
+
+        .time-slot.unavailable {
+            background: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .summary-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-total {
+            border-top: 2px solid #ddd;
+            padding-top: 0.5rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00B2FF, #1A1B25);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 178, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #00B2FF;
+            padding: 1rem 2rem;
+            border: 2px solid #00B2FF;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-secondary:hover {
+            background: #00B2FF;
+            color: white;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .progress-step::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background: #e1e5e9;
+            z-index: 1;
+        }
+
+        .progress-step:last-child::before {
+            display: none;
+        }
+
+        .progress-step.active::before {
+            background: #00B2FF;
+        }
+
+        .progress-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e1e5e9;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-step.active .progress-circle {
+            background: #00B2FF;
+        }
+
+        .progress-step.completed .progress-circle {
+            background: #1A1B25;
+        }
+
+        @media (max-width: 768px) {
+            .form-row,
+            .date-time-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .service-options {
+                grid-template-columns: 1fr;
+                gap: 0.6rem;
+            }
+
+            .service-option {
+                padding: 0.6rem;
+                min-height: 100px;
+            }
+
+            .service-option .icon {
+                font-size: 1.5rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .service-option .name {
+                font-size: 0.85rem;
+            }
+
+            .service-option .price {
+                font-size: 0.85rem;
+            }
+
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .form-group label {
+                font-size: 0.9rem;
+            }
+            
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 1rem;
+                padding: 0.7rem;
+            }
+            
+            .btn-primary, .btn-secondary {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+                width: 100%;
+            }
+            
+            .progress-bar {
+                gap: 0.5rem;
+            }
+            
+            .progress-step {
+                font-size: 0.8rem;
+            }
+            
+            .summary-box {
+                padding: 1rem;
+            }
+            
+            .summary-item {
+                font-size: 0.9rem;
+            }
+            
+            .summary-total {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                margin: 5px;
+                padding: 0.8rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .time-slots {
+                grid-template-columns: 1fr;
+            }
+            
+            .progress-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .progress-step {
+                width: 100%;
+                text-align: left;
+                margin-bottom: 0.5rem;
+            }
+            
+            .service-option {
+                min-height: 90px;
+                padding: 0.5rem;
+            }
+            
+            .service-option .icon {
+                font-size: 1.3rem;
+            }
+            
+            .service-option .name {
+                font-size: 0.8rem;
+            }
+            
+            .service-option .price {
+                font-size: 0.8rem;
+            }
+        }
+
+        .success-message {
+            background: rgba(0, 178, 255, 0.1);
+            border: 1px solid #00B2FF;
+            color: #00B2FF;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message {
+            background: rgba(26, 27, 37, 0.1);
+            border: 1px solid #1A1B25;
+            color: #1A1B25;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        /* Header Navigation - consistent with main site */
+        .nav-header {
+            background: rgba(26, 27, 37, 0.95);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #00B2FF;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: #00B2FF;
+        }
+
+        #mobileMenuBtn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        body {
+            padding-top: 80px; /* Account for fixed header */
+        }
+
+        @media (max-width: 768px) {
+            #mobileMenuBtn {
+                display: block;
+            }
+            
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(26, 27, 37, 0.98);
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+            }
+            
+            .nav-menu.show {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="nav-header" role="banner">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.jpg" alt="Hunter Autoworks" style="height: 25px; width: auto; margin-right: 6px;">
+                <span style="font-size: 1.2rem;">HUNTER AUTOWORKS</span>
+            </a>
+            <nav aria-label="Main Navigation">
+                <button id="mobileMenuBtn" aria-label="Open navigation menu" aria-controls="mainNav" aria-expanded="false">
+                    ☰
+                </button>
+                <ul class="nav-menu" id="mainNav" role="menubar">
+                    <li role="none"><a role="menuitem" href="index.html">Home</a></li>
+                    <li role="none"><a role="menuitem" href="index.html#services">Services</a></li>
+                    <li role="none"><a role="menuitem" href="index.html#about">About</a></li>
+                    <li role="none"><a role="menuitem" href="index.html#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Book Your Service</h1>
+            <p>Schedule professional automotive service with Hunter Autoworks</p>
+        </div>
+
+        <div class="booking-form">
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-step active">
+                    <div class="progress-circle">1</div>
+                    <div>Service</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle">2</div>
+                    <div>Details</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle">3</div>
+                    <div>Schedule</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle">4</div>
+                    <div>Confirm</div>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div id="successMessage" class="success-message"></div>
+            <div id="errorMessage" class="error-message"></div>
+
+            <form id="bookingForm">
+                <!-- Step 1: Service Selection -->
+                <div class="form-section" id="step1">
+                    <h3>🛠️ Select Service</h3>
+                    <div class="service-options" id="serviceOptions">
+                        <!-- Services will be loaded here dynamically -->
+                    </div>
+                </div>
+
+                <!-- Step 2: Customer & Vehicle Details -->
+                <div class="form-section" id="step2" style="display: none;">
+                    <h3>👤 Customer & Vehicle Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name *</label>
+                            <input type="text" id="firstName" name="firstName" required aria-required="true" autocomplete="given-name">
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name *</label>
+                            <input type="text" id="lastName" name="lastName" required aria-required="true" autocomplete="family-name">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" required aria-required="true" autocomplete="tel">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="vehicleMake">Vehicle Make *</label>
+                            <select id="vehicleMake" name="vehicleMake" required aria-required="true">
+                                <option value="">Select Make</option>
+                                <option value="Toyota">Toyota</option>
+                                <option value="Honda">Honda</option>
+                                <option value="Nissan">Nissan</option>
+                                <option value="Mazda">Mazda</option>
+                                <option value="Mitsubishi">Mitsubishi</option>
+                                <option value="Subaru">Subaru</option>
+                                <option value="Volkswagen">Volkswagen</option>
+                                <option value="BMW">BMW</option>
+                                <option value="Mercedes">Mercedes</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="vehicleModel">Vehicle Model *</label>
+                            <input type="text" id="vehicleModel" name="vehicleModel" required aria-required="true">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="vehicleYear">Year *</label>
+                            <input type="number" id="vehicleYear" name="vehicleYear" min="1990" max="2025" required aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label for="mileage">Current Mileage (km)</label>
+                            <input type="number" id="mileage" name="mileage">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Describe the Issue (Optional)</label>
+                        <textarea id="description" name="description" placeholder="Tell us about any specific problems or concerns..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Step 3: Schedule -->
+                <div class="form-section" id="step3" style="display: none;">
+                    <h3>📅 Schedule Your Service</h3>
+                    <div class="date-time-grid">
+                        <div class="form-group">
+                            <label for="serviceDate">Preferred Date *</label>
+                            <input type="date" id="serviceDate" name="serviceDate" required aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label>Preferred Time *</label>
+                            <div class="time-slots">
+                                <div class="time-slot" data-time="08:00">8:00 AM</div>
+                                <div class="time-slot" data-time="09:00">9:00 AM</div>
+                                <div class="time-slot" data-time="10:00">10:00 AM</div>
+                                <div class="time-slot" data-time="11:00">11:00 AM</div>
+                                <div class="time-slot" data-time="13:00">1:00 PM</div>
+                                <div class="time-slot" data-time="14:00">2:00 PM</div>
+                                <div class="time-slot" data-time="15:00">3:00 PM</div>
+                                <div class="time-slot" data-time="16:00">4:00 PM</div>
+                                <div class="time-slot" data-time="17:00">5:00 PM</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Confirmation -->
+                <div class="form-section" id="step4" style="display: none;">
+                    <h3>✅ Confirm Your Booking</h3>
+                    <div class="summary-box">
+                        <div class="summary-item">
+                            <span>Service:</span>
+                            <span id="summaryService">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Customer:</span>
+                            <span id="summaryCustomer">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Vehicle:</span>
+                            <span id="summaryVehicle">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Date & Time:</span>
+                            <span id="summaryDateTime">-</span>
+                        </div>
+                        <div class="summary-item summary-total">
+                            <span>Estimated Cost:</span>
+                            <span id="summaryTotal">TSh 0</span>
+                        </div>
+                    </div>
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+                        * Final cost may vary based on actual diagnosis and parts needed. We will provide a detailed estimate before starting any work.
+                    </p>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="button" id="prevBtn" class="btn-secondary" style="display: none;">Previous</button>
+                    <button type="button" id="nextBtn" class="btn-primary">Next</button>
+                    <button type="submit" id="submitBtn" class="btn-primary" style="display: none;">Confirm Booking</button>
+                </div>
+            </form>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="index.html" class="btn-secondary">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="color: white; padding: 2rem 0; margin-top: 4rem; text-align: center;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+            <p style="margin: 0 0 1rem 0; font-size: 0.9rem;">
+                © 2024 Hunter Autoworks. All rights reserved. | Professional Automotive Service in Dar es Salaam
+            </p>
+            <p style="margin: 0; font-size: 0.8rem;">
+                Powered by <a href="https://exrevolution.co.tz" target="_blank" style="color: #4CAF50; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#66BB6A'" onmouseout="this.style.color='#4CAF50'">EX REVOLUTION</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const navMenu = document.getElementById('mainNav');
+            const header = document.querySelector('.nav-header');
+            
+            function toggleMobileMenu() {
+                const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+                mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
+                if (isExpanded) {
+                    navMenu.classList.remove('show');
+                    navMenu.style.display = 'none';
+                } else {
+                    navMenu.classList.add('show');
+                    navMenu.style.display = 'flex';
+                    navMenu.style.flexDirection = 'column';
+                }
+            }
+            
+            function closeMobileMenu() {
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                navMenu.classList.remove('show');
+                navMenu.style.display = 'none';
+            }
+            
+            if (mobileMenuBtn && navMenu) {
+                mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+                
+                // Close menu when clicking outside the header
+                document.addEventListener('click', function(event) {
+                    // Check if the click was outside the header
+                    if (!header.contains(event.target) && navMenu.classList.contains('show')) {
+                        closeMobileMenu();
+                    }
+                });
+                
+                // Close menu when clicking on a link
+                const navLinks = navMenu.querySelectorAll('a');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        // Add a small delay to ensure navigation works before closing
+                        setTimeout(closeMobileMenu, 100);
+                    });
+                });
+            }
+            
+            // Handle window resize
+            function handleResize() {
+                if (window.innerWidth > 768) {
+                    closeMobileMenu();
+                    if (navMenu) {
+                        navMenu.style.display = 'flex';
+                    }
+                } else {
+                    if (navMenu) {
+                        navMenu.style.display = 'none';
+                    }
+                }
+            }
+            
+            window.addEventListener('resize', handleResize);
+            handleResize(); // Call on initial load
+        });
+
+        // Service selection
+        let selectedService = null;
+        let selectedTime = null;
+        let currentStep = 1;
+        let bookingData = {};
+
+        function selectService(service) {
+            // Remove previous selection
+            document.querySelectorAll('.service-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            // Add selection
+            event.currentTarget.classList.add('selected');
+            selectedService = service;
+
+            // Enable next button
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        // Initialize the booking form
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up time slots
+            setupTimeSlots();
+            
+            // Set up date input constraints
+            setupDateInput();
+            
+            // Set up navigation
+            setupNavigation();
+            
+            // Load services
+            loadServices();
+            
+            // Show first step
+            showStep(currentStep);
+            updateProgress();
+        });
+
+        // Setup time slots
+        function setupTimeSlots() {
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.addEventListener('click', function() {
+                    if (this.classList.contains('unavailable')) return;
+
+                    // Remove previous selection
+                    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+
+                    // Add selection
+                    this.classList.add('selected');
+                    selectedTime = this.dataset.time;
+
+                    updateSummary();
+                });
+            });
+        }
+
+        // Setup date input constraints
+        function setupDateInput() {
+            const dateInput = document.getElementById('serviceDate');
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            // Set minimum date to tomorrow
+            dateInput.min = tomorrow.toISOString().split('T')[0];
+
+            // Set maximum date to 30 days from now
+            const maxDate = new Date(today);
+            maxDate.setDate(maxDate.getDate() + 30);
+            dateInput.max = maxDate.toISOString().split('T')[0];
+        }
+
+        // Setup navigation
+        function setupNavigation() {
+            document.getElementById('nextBtn').addEventListener('click', nextStep);
+            document.getElementById('prevBtn').addEventListener('click', prevStep);
+            document.getElementById('bookingForm').addEventListener('submit', submitBooking);
+        }
+
+        // Navigation functions
+        function nextStep() {
+            if (!validateCurrentStep()) return;
+
+            if (currentStep < 4) {
+                currentStep++;
+                showStep(currentStep);
+                updateProgress();
+                updateSummary();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+                updateProgress();
+            }
+        }
+
+        function showStep(step) {
+            // Hide all steps
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step${i}`).style.display = 'none';
+            }
+
+            // Show current step
+            document.getElementById(`step${step}`).style.display = 'block';
+
+            // Update navigation buttons
+            document.getElementById('prevBtn').style.display = step > 1 ? 'block' : 'none';
+            document.getElementById('nextBtn').style.display = step < 4 ? 'block' : 'none';
+            document.getElementById('submitBtn').style.display = step === 4 ? 'block' : 'none';
+        }
+
+        function updateProgress() {
+            document.querySelectorAll('.progress-step').forEach((step, index) => {
+                if (index + 1 < currentStep) {
+                    step.classList.add('completed');
+                    step.classList.remove('active');
+                } else if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                    step.classList.remove('completed');
+                } else {
+                    step.classList.remove('active', 'completed');
+                }
+            });
+        }
+
+        // Validation
+        function validateCurrentStep() {
+            switch (currentStep) {
+                case 1:
+                    if (!selectedService) {
+                        showError('Please select a service');
+                        return false;
+                    }
+                    break;
+                case 2:
+                    const requiredFields = ['firstName', 'lastName', 'phone', 'vehicleMake', 'vehicleModel', 'vehicleYear'];
+                    for (let field of requiredFields) {
+                        if (!document.getElementById(field).value.trim()) {
+                            showError(`Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+                            return false;
+                        }
+                    }
+                    break;
+                case 3:
+                    if (!document.getElementById('serviceDate').value) {
+                        showError('Please select a date');
+                        return false;
+                    }
+                    if (!selectedTime) {
+                        showError('Please select a time slot');
+                        return false;
+                    }
+                    break;
+            }
+            return true;
+        }
+
+        // Update summary
+        function updateSummary() {
+            if (selectedService) {
+                document.getElementById('summaryService').textContent = selectedService.name;
+                document.getElementById('summaryTotal').textContent = `TSh ${selectedService.price.toLocaleString()}`;
+            }
+
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            if (firstName && lastName) {
+                document.getElementById('summaryCustomer').textContent = `${firstName} ${lastName}`;
+            }
+
+            const make = document.getElementById('vehicleMake').value;
+            const model = document.getElementById('vehicleModel').value;
+            const year = document.getElementById('vehicleYear').value;
+            if (make && model && year) {
+                document.getElementById('summaryVehicle').textContent = `${year} ${make} ${model}`;
+            }
+
+            const date = document.getElementById('serviceDate').value;
+            if (date && selectedTime) {
+                const dateObj = new Date(date);
+                const formattedDate = dateObj.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                const timeFormatted = new Date(`2000-01-01T${selectedTime}:00`).toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                document.getElementById('summaryDateTime').textContent = `${formattedDate} at ${timeFormatted}`;
+            }
+        }
+
+        // Load services
+        async function loadServices() {
+            try {
+                // Use the same API base as the main site
+                const API_BASE = 'http://localhost:5001/api';
+                const res = await fetch(`${API_BASE}/services`);
+                if (!res.ok) throw new Error('Network error');
+                const services = await res.json();
+                
+                const serviceOptions = document.getElementById('serviceOptions');
+                if (!serviceOptions) return;
+                
+                serviceOptions.innerHTML = services.map(service => `
+                    <div class="service-option" onclick="selectService(${JSON.stringify(service).replace(/"/g, '&quot;')})">
+                        <div class="icon">${service.icon || '🔧'}</div>
+                        <div class="name">${service.name}</div>
+                        <div class="price">From TSh ${service.price.toLocaleString()}</div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Error loading services:', err);
+                // Fallback to default services
+                const defaultServices = [
+                    { name: 'Engine Diagnostics', price: 15000, icon: '🔍' },
+                    { name: 'Oil Change & Filter', price: 35000, icon: '🛢️' },
+                    { name: 'Brake Service', price: 45000, icon: '🛑' },
+                    { name: 'Transmission Service', price: 80000, icon: '⚙️' },
+                    { name: 'AC Service', price: 25000, icon: '❄️' },
+                    { name: 'General Maintenance', price: 40000, icon: '🔧' }
+                ];
+                
+                const serviceOptions = document.getElementById('serviceOptions');
+                if (serviceOptions) {
+                    serviceOptions.innerHTML = defaultServices.map(service => `
+                        <div class="service-option" onclick="selectService(${JSON.stringify(service).replace(/"/g, '&quot;')})">
+                            <div class="icon">${service.icon || '🔧'}</div>
+                            <div class="name">${service.name}</div>
+                            <div class="price">From TSh ${service.price.toLocaleString()}</div>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        // Submit booking
+        async function submitBooking(e) {
+            e.preventDefault();
+
+            // Collect all form data
+            const formData = new FormData(document.getElementById('bookingForm'));
+            const bookingData = Object.fromEntries(formData);
+            
+            // Add selected service data
+            if (selectedService) {
+                bookingData.service = selectedService.name;
+                bookingData.servicePrice = selectedService.price;
+            }
+            
+            // Add time data
+            bookingData.time = selectedTime;
+            
+            // Generate booking ID
+            bookingData.bookingId = 'HA' + Date.now();
+            bookingData.status = 'pending';
+            bookingData.createdAt = new Date().toISOString();
+
+            try {
+                // Submit to backend API
+                const API_BASE = 'http://localhost:5001/api';
+                const response = await fetch(`${API_BASE}/bookings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bookingData)
+                });
+                
+                if (!response.ok) throw new Error('Network error');
+                
+                // Show success message
+                showSuccess(`Booking confirmed! Your booking ID is ${bookingData.bookingId}. We will contact you within 2 hours to confirm the appointment.`);
+                
+                // Reset form after 3 seconds
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 3000);
+            } catch (err) {
+                console.error('Booking error:', err);
+                // Fallback to localStorage
+                let bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+                bookings.push(bookingData);
+                localStorage.setItem('bookings', JSON.stringify(bookings));
+                
+                // Show success message even with fallback
+                showSuccess(`Booking confirmed! Your booking ID is ${bookingData.bookingId}. We will contact you within 2 hours to confirm the appointment.`);
+                
+                // Reset form after 3 seconds
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 3000);
+            }
+        }
+
+        // Error and success messages
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            if (successDiv) {
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+                setTimeout(() => {
+                    successDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>

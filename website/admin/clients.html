@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clients — Hunter Auto</title>
+    <link rel="stylesheet" href="styles-clean.css" />
+    <script>
+      // Apply dark mode immediately to prevent flash
+      if (localStorage.getItem('appSettings')) {
+        const settings = JSON.parse(localStorage.getItem('appSettings'));
+        if (settings.darkMode) {
+          document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('dark-mode');
+          });
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" role="navigation">
+        <div class="brand"><div style="font-weight:900">Hunter Auto</div><div class="small">Admin</div></div>
+        <nav class="nav">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="documents.html">Documents</a>
+          <a href="invoices.html">Invoices</a>
+          <a href="clients.html" class="active">Clients</a>
+          <a href="services.html">Services</a>
+          <a href="reports.html">Reports</a>
+          <a href="settings.html">Settings</a>
+        </nav>
+      </aside>
+
+      <main class="main-area">
+        <header class="topbar">
+          <div class="left">
+            <button id="hamburger" class="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+            <h1 style="background:var(--gradient-primary);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent">👥 Clients</h1>
+          </div>
+          <div class="actions"><button id="btn-new-client" class="action-btn">➕ New Client</button></div>
+        </header>
+        <section style="padding:24px">
+          <!-- Search and Filter Bar -->
+          <div class="card" style="margin-bottom:24px;padding:16px">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div style="flex:1;position:relative">
+                <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted)">🔍</span>
+                <input 
+                  type="text" 
+                  id="search-clients" 
+                  placeholder="Search clients by name, email, or phone..." 
+                  style="width:100%;padding:12px 12px 12px 40px;border:1px solid var(--gray-200);border-radius:var(--radius-md);font-size:0.875rem;transition:all 0.2s"
+                  onfocus="this.style.borderColor='var(--primary)';this.style.boxShadow='0 0 0 3px rgba(0,178,255,0.1)'"
+                  onblur="this.style.borderColor='var(--gray-200)';this.style.boxShadow='none'"
+                />
+              </div>
+              <button class="action-btn" style="background:var(--gradient-success)" onclick="filterClients()">Filter</button>
+            </div>
+          </div>
+
+          <div id="clients-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px"></div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="mobile-overlay"></div>
+
+    <script src="admin.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded',()=>{
+        if (typeof initClientsPage === 'function') initClientsPage();
+      });
+    </script>
+  </body>
+</html>
