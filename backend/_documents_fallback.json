@@ -1,0 +1,31 @@
+[
+  {
+    "id": 2,
+    "doc_id": "TEST-TS-123",
+    "type": "estimate",
+    "booking_id": "",
+    "customer": "PS Auto Test",
+    "doc_date": "2025-10-15",
+    "services": [
+      {
+        "price": 5000,
+        "name": "Oil Change"
+      }
+    ],
+    "html": "<p>Test</p>",
+    "meta": {},
+    "created_at": "2025-10-15T14:41:57.862Z"
+  },
+  {
+    "id": 1,
+    "doc_id": "test-002",
+    "type": "Estimate",
+    "booking_id": null,
+    "customer": "PS Test",
+    "doc_date": "2025-10-15",
+    "services": [],
+    "html": "<p>PS Test</p>",
+    "meta": {},
+    "created_at": "2025-10-15T12:56:52.109Z"
+  }
+]
