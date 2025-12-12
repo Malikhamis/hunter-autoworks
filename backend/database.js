@@ -37,10 +37,17 @@ async function connectWithRetry(maxAttempts = 6, baseDelayMs = 1000) {
       console.log('Connected to PostgreSQL database (pool test query succeeded)');
       return;
     } catch (err) {
-      // If DNS lookup failed (ENOTFOUND / getaddrinfo) try an IPv6 AAAA resolve and connect directly
+      // If DNS or network lookup failed (ENOTFOUND / ENETUNREACH / EHOSTUNREACH etc.) try IPv6/IPv4 literal fallbacks.
       const msg = err && err.message ? err.message : '';
-      // When DNS fails or getaddrinfo reports not found, try IPv6 then IPv4 literal fallbacks.
-      if ((err && (err.code === 'ENOTFOUND' || msg.includes('getaddrinfo') || msg.includes('ENOTFOUND')))) {
+      // Treat a broader set of network-related errors as signals to attempt literal IP fallbacks.
+      const networkFailure = err && (
+        ['ENOTFOUND', 'ENETUNREACH', 'EHOSTUNREACH', 'ECONNREFUSED', 'EADDRNOTAVAIL'].includes(err.code)
+        || msg.includes('getaddrinfo')
+        || msg.includes('ENOTFOUND')
+        || msg.includes('ENETUNREACH')
+        || msg.includes('EHOSTUNREACH')
+      );
+      if (networkFailure) {
         const parsed = new URL(process.env.DATABASE_URL);
         const host = parsed.hostname;
 
