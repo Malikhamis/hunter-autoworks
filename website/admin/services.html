@@ -4,7 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Services — Hunter Auto</title>
-    <link rel="stylesheet" href="styles-clean.css" />
+  <style>html{visibility:hidden}html.page-ready{visibility:visible}</style>
+  <link rel="preload" href="styles-clean.css" as="style" onload="this.rel='stylesheet';document.documentElement.classList.add('page-ready')">
+  <noscript><link rel="stylesheet" href="styles-clean.css"></noscript>
     <script>
       // Apply dark mode immediately to prevent flash
       if (localStorage.getItem('appSettings')) {

@@ -16,6 +16,9 @@ window.API_BASE = window.API_BASE || (
         : 'https://hunter-autoworks.onrender.com/api'
 );
 const API_BASE = window.API_BASE;
+// Small fallback: mark the document as "page-ready" when admin scripts initialize.
+// Primary visibility control is handled by the stylesheet link onload in each HTML head.
+try{ document.documentElement.classList.add('page-ready'); }catch(e){/* noop */}
 let jwtToken = localStorage.getItem('admin_jwt') || '';
 let useLocalStorageMode = false; // Fallback mode when backend is unreachable
 
