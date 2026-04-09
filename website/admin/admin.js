@@ -94,7 +94,14 @@ async function adminLogin(username, password) {
 function adminLogout() {
     clearToken();
     showSuccess('Logged out.');
-    // Optionally reload page or show login form
+    // Immediately switch UI to login if available, otherwise reload
+    if (typeof showLogin === 'function') {
+        try { showLogin(); } catch (e) { console.warn('showLogin() call failed', e); location.reload(); }
+    } else {
+        // Best-effort: hide dashboard if present then reload
+        try { const dash = document.getElementById('dashboard'); if (dash) dash.style.display = 'none'; } catch (e) {}
+        location.reload();
+    }
 }
 
 // Expose adminLogin and adminLogout globally for HTML inline event handlers
