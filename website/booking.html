@@ -1008,8 +1008,10 @@
         // Load services
         async function loadServices() {
             try {
-                // Use the same API base as the main site
-                const API_BASE = 'http://localhost:5001/api';
+                // Use production API for deployed site
+                const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                    ? 'http://localhost:5001/api'
+                    : 'https://hunter-autoworks-backend.onrender.com/api';
                 const res = await fetch(`${API_BASE}/services`);
                 if (!res.ok) throw new Error('Network error');
                 const services = await res.json();
