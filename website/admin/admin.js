@@ -30,6 +30,42 @@ function getAuthHeaders() {
     return jwtToken ? { 'Authorization': 'Bearer ' + jwtToken } : {};
 }
 
+// --- Mobile Menu Functionality ---
+function initMobileMenu() {
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    document.body.appendChild(overlay);
+
+    if (hamburger && sidebar) {
+        hamburger.addEventListener('click', function() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        });
+
+        // Close menu when clicking overlay
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        });
+
+        // Close menu when clicking a nav link (mobile only)
+        const navLinks = sidebar.querySelectorAll('.nav a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('show');
+                }
+            });
+        });
+    }
+}
+
+// Initialize mobile menu when DOM is loaded
+document.addEventListener('DOMContentLoaded', initMobileMenu);
+
 // --- Admin Authentication ---
 async function adminLogin(username, password) {
     try {
