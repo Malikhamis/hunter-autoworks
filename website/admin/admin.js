@@ -13,14 +13,10 @@
 window.API_BASE = window.API_BASE || (
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:5001/api'
-        : 'https://hunter-autoworks.onrender.com/api'
+        : `${window.location.protocol}//${window.location.hostname}/api`
 );
 const API_BASE = window.API_BASE;
-// Small fallback: mark the document as "page-ready" when admin scripts initialize.
-// Primary visibility control is handled by the stylesheet link onload in each HTML head.
-try{ document.documentElement.classList.add('page-ready'); }catch(e){/* noop */}
 let jwtToken = localStorage.getItem('admin_jwt') || '';
-let useLocalStorageMode = false; // Fallback mode when backend is unreachable
 
 function setToken(token) {
     jwtToken = token;
@@ -46,7 +42,6 @@ async function adminLogin(username, password) {
         const data = await res.json();
         setToken(data.token);
         showSuccess('Login successful!');
-        useLocalStorageMode = false;
         await loadServices();
         // After successful login, attempt to sync any locally stored documents
         try {
@@ -57,16 +52,7 @@ async function adminLogin(username, password) {
         }
         // Optionally reload page or hide login form
     } catch (e) {
-        console.warn('Backend login failed, trying localStorage mode', e);
-        // Fallback to localStorage-only mode (demo credentials)
-        if (username === 'hunter' && password === 'hunter_admin1234') {
-            setToken('local_mode_token');
-            useLocalStorageMode = true;
-            showSuccess('Login successful! (Local mode - no backend connection)');
-            await loadServices();
-        } else {
-            showError('Invalid credentials. Use: hunter / hunter_admin1234');
-        }
+        showError('Invalid credentials.');
     }
 }
 function adminLogout() {
@@ -100,61 +86,25 @@ window.showLoginModal = showLoginModal;
 let services = [];
 
 async function loadServices() {
-    const serviceList = document.getElementById('serviceList') || document.getElementById('services-list');
+    const serviceList = document.getElementById('serviceList');
     if (!serviceList) return;
     try {
         const res = await fetch(`${API_BASE}/services`);
         services = await res.json();
+    return services;
         serviceList.innerHTML = '';
-        
-        if (!services || !services.length) {
-            serviceList.innerHTML = `
-                <div style="grid-column:1/-1">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🔧</div>
-                        <h3 class="empty-state-title">No services yet</h3>
-                        <p class="empty-state-description">Add services to start building invoices and estimates</p>
-                        <button class="action-btn" onclick="document.getElementById('btn-new-service')?.click()">Add Service</button>
-                    </div>
-                </div>
-            `;
-            return services;
-        }
-        
         services.forEach((service, index) => {
             const serviceItem = document.createElement('div');
-            serviceItem.className = 'card card-premium fade-in';
-            serviceItem.style.animationDelay = `${index * 0.05}s`;
-            
-            // Service icons based on name
-            const iconMap = {
-                'oil': '🛢️', 'brake': '🔴', 'tire': '🛞', 'engine': '⚙️', 'battery': '🔋',
-                'wash': '💦', 'paint': '🎨', 'repair': '🔧', 'diagnostic': '🔍', 'service': '🔧'
-            };
-            const serviceName = service.name.toLowerCase();
-            let icon = '🔧';
-            for (const [key, value] of Object.entries(iconMap)) {
-                if (serviceName.includes(key)) { icon = value; break; }
-            }
-            
+            serviceItem.className = 'service-item';
             serviceItem.innerHTML = `
-                <div style="display:flex;align-items:start;gap:16px;margin-bottom:16px">
-                    <div class="icon-container icon-container-warning" style="font-size:1.5rem">${icon}</div>
-                    <div style="flex:1;min-width:0">
-                        <div style="font-weight:700;font-size:1.125rem;color:var(--text-primary);margin-bottom:4px">${escapeHtml(service.name)}</div>
-                        <div style="font-size:1.5rem;font-weight:800;background:var(--gradient-success);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent">
-                            TSh ${service.price.toLocaleString()}
-                        </div>
-                    </div>
-                </div>
-                <div style="display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--gray-200)">
-                    <button class="action-btn" style="flex:1;font-size:0.8rem;padding:8px" onclick="editService(${index})">✏️ Edit</button>
-                    <button class="logout-btn" style="flex:1;font-size:0.8rem;padding:8px" onclick="deleteService(${index})">🗑️ Delete</button>
+                <div><strong>${service.name}</strong> - TSh ${service.price.toLocaleString()}</div>
+                <div>
+                    <button onclick="editService(${index})">Edit</button>
+                    <button onclick="deleteService(${index})">Delete</button>
                 </div>
             `;
             serviceList.appendChild(serviceItem);
         });
-        return services;
     } catch (e) {
         showError('Failed to load services from server.');
     }
@@ -596,50 +546,22 @@ async function loadClients() {
         const clients = await res.json();
         container.innerHTML = '';
         if (!clients.length) {
-            container.innerHTML = `
-                <div style="grid-column:1/-1">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">👥</div>
-                        <h3 class="empty-state-title">No clients yet</h3>
-                        <p class="empty-state-description">Add your first client to start managing your customer relationships</p>
-                        <button class="action-btn" onclick="document.getElementById('btn-new-client')?.click()">Add Client</button>
-                    </div>
-                </div>
-            `;
+            container.innerHTML = '<div class="card">No clients yet. Click New Client to add one.</div>';
             return;
         }
-        clients.forEach((c, i) => {
+        clients.forEach(c => {
             const el = document.createElement('div');
-            el.className = 'card card-premium fade-in';
-            el.style.animationDelay = `${i * 0.05}s`;
-            
-            // Generate avatar initials
-            const initials = (c.name || 'N/A').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-            const colors = ['var(--gradient-primary)', 'var(--gradient-success)', 'var(--gradient-warning)', 'var(--gradient-purple)', 'var(--gradient-pink)'];
-            const avatarBg = colors[i % colors.length];
-            
+            el.className = 'card';
             el.innerHTML = `
-                <div style="display:flex;gap:16px;align-items:start">
-                    <div style="width:56px;height:56px;border-radius:var(--radius-lg);background:${avatarBg};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.25rem;color:white;flex-shrink:0">
-                        ${initials}
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                        <div style="font-weight:800">${escapeHtml(c.name || '')}</div>
+                        <div style="font-size:0.9rem;color:#64748b">${escapeHtml(c.contact_phone||'')} • ${escapeHtml(c.contact_email||'')}</div>
                     </div>
-                    <div style="flex:1;min-width:0">
-                        <div style="font-weight:700;font-size:1.125rem;color:var(--text-primary);margin-bottom:4px">${escapeHtml(c.name || 'N/A')}</div>
-                        <div style="display:flex;flex-direction:column;gap:4px;font-size:0.875rem;color:var(--text-muted)">
-                            <div style="display:flex;align-items:center;gap:6px">
-                                <span>📞</span>
-                                <span>${escapeHtml(c.contact_phone || 'No phone')}</span>
-                            </div>
-                            <div style="display:flex;align-items:center;gap:6px">
-                                <span>📧</span>
-                                <span style="overflow:hidden;text-overflow:ellipsis">${escapeHtml(c.contact_email || 'No email')}</span>
-                            </div>
-                        </div>
+                    <div>
+                        <button onclick="editClient('${c.id || c.id}')">Edit</button>
+                        <button onclick="deleteClient('${c.id || c.id}')">Delete</button>
                     </div>
-                </div>
-                <div style="display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-200)">
-                    <button class="action-btn" style="flex:1;font-size:0.8rem;padding:8px" onclick="editClient('${c.id || c.id}')">✏️ Edit</button>
-                    <button class="logout-btn" style="flex:1;font-size:0.8rem;padding:8px" onclick="deleteClient('${c.id || c.id}')">🗑️ Delete</button>
                 </div>
             `;
             container.appendChild(el);

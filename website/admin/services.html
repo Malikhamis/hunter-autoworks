@@ -4,20 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Services — Hunter Auto</title>
-  <style>html{visibility:hidden}html.page-ready{visibility:visible}</style>
-  <link rel="preload" href="styles-clean.css" as="style" onload="this.rel='stylesheet';document.documentElement.classList.add('page-ready')">
-  <noscript><link rel="stylesheet" href="styles-clean.css"></noscript>
-    <script>
-      // Apply dark mode immediately to prevent flash
-      if (localStorage.getItem('appSettings')) {
-        const settings = JSON.parse(localStorage.getItem('appSettings'));
-        if (settings.darkMode) {
-          document.addEventListener('DOMContentLoaded', function() {
-            document.body.classList.add('dark-mode');
-          });
-        }
-      }
-    </script>
+    <link rel="stylesheet" href="styles-clean.css" />
   </head>
   <body>
     <div class="app-shell">
@@ -35,21 +22,12 @@
       </aside>
 
       <main class="main-area">
-        <header class="topbar">
-          <div class="left">
-            <button id="hamburger" class="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-            <h1 style="background:var(--gradient-primary);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent">🔧 Services</h1>
-          </div>
-          <div class="actions"><button id="btn-new-service" class="action-btn">➕ New Service</button></div>
-        </header>
-        <section style="padding:24px">
-          <div id="services-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px"></div>
+        <header class="topbar"><div class="left"><h1>Services</h1></div><div class="actions"><button id="btn-new-service">New Service</button></div></header>
+        <section style="padding:18px">
+          <div id="serviceList" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px"></div>
         </section>
       </main>
     </div>
-
-    <!-- Mobile Overlay -->
-    <div id="mobileOverlay" class="mobile-overlay"></div>
 
     <script src="admin.js"></script>
     <script>

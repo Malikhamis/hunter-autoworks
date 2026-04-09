@@ -4,9 +4,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Dashboard - Hunter Auto Admin</title>
-    <style>html{visibility:hidden}html.page-ready{visibility:visible}</style>
-    <link rel="preload" href="styles-clean.css" as="style" onload="this.rel='stylesheet';document.documentElement.classList.add('page-ready')">
-    <noscript><link rel="stylesheet" href="styles-clean.css"></noscript>
+        <link rel="stylesheet" href="styles-clean.css" />
     </head>
     <body>
         <div class="app-shell">
@@ -61,14 +59,14 @@
             
             <div id="loginError" class="message error" style="margin-bottom: 0.75rem;"></div>
             
-            <form id="loginForm" autocomplete="on">
+            <form id="loginForm">
                 <div class="form-group" style="margin-bottom: 0.75rem;">
                     <label for="username" style="font-size: 0.875rem; margin-bottom: 0.25rem;">Username</label>
-                    <input type="text" id="username" name="username" required autocomplete="username" style="padding: 0.5rem; font-size: 0.875rem;">
+                    <input type="text" id="username" name="username" required style="padding: 0.5rem; font-size: 0.875rem;">
                 </div>
                 <div class="form-group" style="margin-bottom: 0.75rem;">
                     <label for="password" style="font-size: 0.875rem; margin-bottom: 0.25rem;">Password</label>
-                    <input type="password" id="password" name="password" required autocomplete="current-password" style="padding: 0.5rem; font-size: 0.875rem;">
+                    <input type="password" id="password" name="password" required style="padding: 0.5rem; font-size: 0.875rem;">
                 </div>
                 <button type="submit" class="compact-btn compact-btn-primary" style="width:100%;margin-bottom:0.5rem;padding:0.5rem;font-size:0.875rem;">Login</button>
                 <button type="button" id="createAdminBtn" class="compact-btn compact-btn-success" style="width:100%;margin-bottom:0.5rem;padding:0.5rem;font-size:0.875rem;">Create New Admin</button>
@@ -216,15 +214,13 @@
                     <div class="invoice-form-section">
                         <h3 style="margin:0 0 0.5rem 0;font-size:1rem">🗂️ Document Type</h3>
                         <div class="form-row">
-                            <label for="docTypeSelect" class="visually-hidden">Document Type</label>
-                            <select id="docTypeSelect" aria-label="Select document type">
+                            <select id="docTypeSelect">
                                 <option value="estimate">Estimate</option>
                                 <option value="quote">Quotation</option>
                                 <option value="proforma">Proforma Invoice</option>
                                 <option value="invoice" selected>Invoice</option>
                             </select>
-                            <label for="invoiceDate" class="visually-hidden">Invoice Date</label>
-                            <input type="date" id="invoiceDate" required aria-label="Select invoice date" />
+                            <input type="date" id="invoiceDate" required />
                             <div class="total-display">
                                 <strong>Total: TSh <span id="invoiceTotal">0</span></strong>
                             </div>
@@ -236,12 +232,10 @@
                     <div class="invoice-form-section">
                         <h3 style="margin:0 0 0.5rem 0;font-size:1rem">👤 Customer Information</h3>
                         <div class="form-row">
-                            <label for="invoiceBooking" class="visually-hidden">Select Existing Customer</label>
-                            <select id="invoiceBooking" onchange="loadCustomerFromBooking()" aria-label="Select existing customer (optional)">
+                            <select id="invoiceBooking" onchange="loadCustomerFromBooking()">
                                 <option value="">Select Existing Customer (Optional)</option>
                             </select>
-                            <label for="invoiceCustomer" class="visually-hidden">Customer Name</label>
-                            <input type="text" id="invoiceCustomer" placeholder="Customer Name *" required aria-label="Enter customer name" />
+                            <input type="text" id="invoiceCustomer" placeholder="Customer Name *" required />
                         </div>
                     </div>
 
@@ -290,21 +284,19 @@
         <div id="loginModal" class="modal" style="display:none">
             <div class="modal-content">
                 <h3>Admin Login</h3>
-                <form id="loginModalForm" autocomplete="on">
-                    <div class="form-group">
-                        <label for="loginUser">Username</label>
-                        <input id="loginUser" type="text" name="username" placeholder="admin@example.com" autocomplete="username" />
-                    </div>
-                    <div class="form-group">
-                        <label for="loginPass">Password</label>
-                        <input id="loginPass" type="password" name="password" placeholder="password" autocomplete="current-password" />
-                    </div>
-                    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-                        <button type="button" id="loginCancel" class="action-btn">Cancel</button>
-                        <button type="submit" id="loginSubmit" class="action-btn">Sign in</button>
-                    </div>
-                    <div id="loginError" class="message error" style="display:none;margin-top:8px"></div>
-                </form>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input id="loginUser" type="text" placeholder="admin@example.com" />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input id="loginPass" type="password" placeholder="password" />
+                </div>
+                <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+                    <button id="loginCancel" class="action-btn">Cancel</button>
+                    <button id="loginSubmit" class="action-btn">Sign in</button>
+                </div>
+                <div id="loginError" class="message error" style="display:none;margin-top:8px"></div>
             </div>
         </div>
     <script>
