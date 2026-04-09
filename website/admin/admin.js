@@ -319,14 +319,14 @@ async function loadBookings() {
             item.className = 'booking-item';
             item.innerHTML = `
                 <div class="booking-header">
-                    <span class="booking-id">${booking._id || ''}</span>
+                    <span class="booking-id">${booking.booking_id || booking.id || booking._id || ''}</span>
                     <span class="booking-status status-${booking.status || 'pending'}">${booking.status || 'pending'}</span>
                 </div>
                 <div class="booking-details">
-                    <strong>${booking.name}</strong> | ${booking.phone}<br>
-                    <em>${booking.vehicle}</em><br>
-                    <span>Service: ${booking.service}</span><br>
-                    <span>Date: ${new Date(booking.createdAt).toLocaleString()}</span>
+                    <strong>${(booking.first_name || booking.firstName || '') + (booking.last_name || booking.lastName ? ' ' + (booking.last_name || booking.lastName) : '')}</strong> | ${booking.phone || ''}<br>
+                    <em>${(booking.vehicle_year || booking.vehicleYear || '') + ' ' + (booking.vehicle_make || booking.vehicleMake || '') + ' ' + (booking.vehicle_model || booking.vehicleModel || '')}</em><br>
+                    <span>Service: ${booking.service || ''}</span><br>
+                    <span>Date: ${new Date(booking.created_at || booking.createdAt || booking.booking_date || booking.date || Date.now()).toLocaleString()}</span>
                 </div>
             `;
             bookingsList.appendChild(item);

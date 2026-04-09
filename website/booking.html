@@ -1074,8 +1074,18 @@
             bookingData.createdAt = new Date().toISOString();
 
             try {
-                // Submit to backend API
-                const API_BASE = 'http://localhost:5001/api';
+                // Submit to backend API (auto-detect environment)
+                const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                    ? 'http://localhost:5001/api'
+                    : 'https://hunter-autoworks-backend.onrender.com/api';
+
+                // Normalize field names to match backend expectations
+                bookingData.date = bookingData.serviceDate || bookingData.date || null;
+                bookingData.message = bookingData.description || bookingData.message || null;
+                bookingData.vehicleMake = bookingData.vehicleMake || bookingData.vehicle_make || null;
+                bookingData.vehicleModel = bookingData.vehicleModel || bookingData.vehicle_model || null;
+                bookingData.vehicleYear = bookingData.vehicleYear || bookingData.vehicle_year || null;
+
                 const response = await fetch(`${API_BASE}/bookings`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
