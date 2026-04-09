@@ -31,7 +31,13 @@
       </aside>
 
       <main class="main-area">
-        <header class="topbar"><div class="left"><h1>Documents</h1></div><div class="actions"><button id="btn-new-doc">New</button></div></header>
+        <header class="topbar">
+          <div class="left">
+            <button id="hamburger" class="hamburger" aria-label="Open menu">☰</button>
+            <div class="brand"><h1>Documents</h1></div>
+          </div>
+          <div class="actions"><button id="btn-new-doc">New</button></div>
+        </header>
         <section style="padding:18px">
           <p>Manage Estimates, Quotations, Proformas and Invoices from here.</p>
           <div id="documents-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px"></div>
