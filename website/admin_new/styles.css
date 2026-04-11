@@ -1,0 +1,33 @@
+/* admin_new styles - namespaced under .ha- to avoid conflicts */
+:root{
+  --primary:#00b2ff; --bg:#f6f8fb; --card:#ffffff; --text:#0f172a; --muted:#64748b; --radius:12px; --pad:16px;
+}
+*{box-sizing:border-box}
+body{font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text);margin:0}
+.ha-shell{display:flex;min-height:100vh}
+.ha-sidebar{width:260px;background:var(--card);padding:20px;border-right:1px solid #e6eef7}
+.ha-brand{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.ha-brand img{width:40px;height:40px;border-radius:6px;object-fit:cover}
+.ha-brand-text .ha-title{font-weight:700}
+.ha-nav{display:flex;flex-direction:column;gap:8px}
+.ha-nav-item{padding:10px 12px;border-radius:8px;color:var(--muted);text-decoration:none}
+.ha-nav-item.active, .ha-nav-item:hover{background:#f0fbff;color:var(--primary);font-weight:600}
+.ha-version{font-size:12px;color:var(--muted);margin-top:20px}
+.ha-main{flex:1;display:flex;flex-direction:column}
+.ha-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:transparent}
+.ha-hamburger{display:none}
+.ha-actions{display:flex;gap:8px}
+.ha-btn{padding:8px 12px;border-radius:8px;border:none;background:var(--primary);color:#fff;cursor:pointer}
+.ha-btn-outline{background:transparent;border:1px solid #cfeffd;color:var(--text)}
+.ha-content{padding:20px}
+.ha-login{max-width:360px;margin:40px auto;background:var(--card);padding:20px;border-radius:12px;box-shadow:0 6px 18px rgba(16,24,40,0.06)}
+.ha-login-form input{width:100%;padding:10px;margin-bottom:10px;border-radius:8px;border:1px solid #e6eef7}
+.ha-stats{display:flex;gap:12px;margin-bottom:16px}
+.ha-stat{flex:1;background:var(--card);padding:12px;border-radius:10px;box-shadow:0 4px 10px rgba(16,24,40,0.03)}
+.ha-stat-number{font-weight:700;font-size:1.25rem}
+.ha-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.ha-panel{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(16,24,40,0.04)}
+.ha-panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ha-list{max-height:480px;overflow:auto}
+.ha-list .booking-item{padding:10px;border-radius:8px;border:1px solid #eef6fb;margin-bottom:8px}
+@media (max-width:900px){.ha-sidebar{display:none}.ha-hamburger{display:block}.ha-grid{grid-template-columns:1fr}}

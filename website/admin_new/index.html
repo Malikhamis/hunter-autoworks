@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Hunter Autoworks (New)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ha-shell">
+    <aside class="ha-sidebar" role="navigation" aria-label="Main navigation">
+      <div class="ha-brand">
+        <img src="../images/logo.jpg" alt="Hunter Autoworks" />
+        <div class="ha-brand-text">
+          <div class="ha-title">Hunter Autoworks</div>
+          <div class="ha-sub">Admin</div>
+        </div>
+      </div>
+      <nav class="ha-nav">
+        <a href="#" class="ha-nav-item active" data-target="dashboardTab">Dashboard</a>
+        <a href="#" class="ha-nav-item" data-target="services">Services</a>
+        <a href="#" class="ha-nav-item" data-target="documents">Documents</a>
+        <a href="#" class="ha-nav-item" data-target="analytics">Analytics</a>
+        <a href="../admin/clients.html" class="ha-nav-item">Clients</a>
+        <a href="../admin/invoices.html" class="ha-nav-item">Invoices</a>
+        <a href="../admin/settings.html" class="ha-nav-item">Settings</a>
+      </nav>
+      <div class="ha-version">v1.0</div>
+    </aside>
+
+    <main class="ha-main">
+      <header class="ha-topbar">
+        <button id="hamburger" class="ha-hamburger" aria-label="Toggle menu">☰</button>
+        <h1 class="ha-page-title">Dashboard</h1>
+        <div class="ha-actions">
+          <button id="logoutBtn" class="ha-btn ha-btn-outline">Logout</button>
+        </div>
+      </header>
+
+      <section class="ha-content">
+        <!-- Login container (kept for compatibility with admin.js) -->
+        <div id="loginContainer" class="ha-login" hidden>
+          <form id="loginForm" class="ha-login-form">
+            <h2>Admin Login</h2>
+            <div class="ha-form-row"><input id="username" name="username" placeholder="Username" required></div>
+            <div class="ha-form-row"><input id="password" type="password" name="password" placeholder="Password" required></div>
+            <div class="ha-form-row"><button type="submit" class="ha-btn ha-btn-primary">Login</button></div>
+            <div id="loginError" class="ha-message ha-error" aria-live="polite"></div>
+          </form>
+        </div>
+
+        <!-- Dashboard (visible when logged in) -->
+        <div id="dashboard" class="ha-dashboard">
+          <div class="ha-stats">
+            <div class="ha-stat"><div id="totalBookings" class="ha-stat-number">0</div><div class="ha-stat-label">Total Bookings</div></div>
+            <div class="ha-stat"><div id="pendingBookings" class="ha-stat-number">0</div><div class="ha-stat-label">Pending</div></div>
+            <div class="ha-stat"><div id="todayRevenue" class="ha-stat-number">TSh 0</div><div class="ha-stat-label">Today</div></div>
+            <div class="ha-stat"><div id="monthlyRevenue" class="ha-stat-number">TSh 0</div><div class="ha-stat-label">Month</div></div>
+          </div>
+
+          <div class="ha-grid">
+            <div class="ha-panel">
+              <div class="ha-panel-header"><h3>Recent Bookings</h3><button class="ha-small" onclick="refreshData()">Refresh</button></div>
+              <div id="bookingsList" class="ha-list"></div>
+            </div>
+
+            <div class="ha-panel">
+              <div class="ha-panel-header"><h3>Quick Actions</h3></div>
+              <div class="ha-panel-body">
+                <button onclick="exportBookings()" class="ha-btn">Export Bookings</button>
+                <button onclick="viewCustomers()" class="ha-btn">View Customers</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Include existing admin logic for API calls and behavior -->
+  <script src="../admin/admin.js"></script>
+  <!-- Local adapter to wire login/dashboard UI (keeps IDs expected by admin.js) -->
+  <script src="init.js"></script>
+</body>
+</html>
