@@ -27,3 +27,61 @@ window.showDashboard = showDashboard; window.showLogin = showLogin; window.showL
 
 // Init on DOM load
 document.addEventListener('DOMContentLoaded', ()=>{ checkAuth(); setupEventListeners(); try { if (typeof loadBookings === 'function') loadBookings(); if (typeof loadAnalytics === 'function') loadAnalytics(); } catch(e){ console.warn('Adapter init failed to call optional loaders', e); } });
+
+// --- Polling for realtime bookings (safe, polling fallback) ---
+let pollingTimer = null;
+const POLLING_INTERVAL_MS = 5000;
+let isPolling = false;
+
+function showPollingStatus(on) {
+  const el = document.getElementById('pollingStatus');
+  if (!el) return;
+  el.style.display = on ? 'inline-block' : 'none';
+}
+
+async function pollOnce() {
+  if (document.hidden) return; // pause when tab not visible
+  try {
+    if (typeof loadBookings === 'function') {
+      await loadBookings();
+    }
+  } catch (e) {
+    console.warn('Polling loadBookings failed', e);
+  }
+}
+
+function startPolling() {
+  if (isPolling) return;
+  isPolling = true;
+  showPollingStatus(true);
+  // run immediately, then schedule
+  pollOnce();
+  pollingTimer = setInterval(async () => {
+    // stop polling if no token
+    if (!localStorage.getItem('admin_jwt')) {
+      stopPolling();
+      return;
+    }
+    await pollOnce();
+  }, POLLING_INTERVAL_MS);
+}
+
+function stopPolling() {
+  if (!isPolling) return;
+  isPolling = false;
+  showPollingStatus(false);
+  if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
+}
+
+// Adjust checkAuth to start/stop polling appropriately
+const _origCheckAuth = checkAuth;
+function checkAuthWrapper() {
+  _origCheckAuth();
+  if (localStorage.getItem('admin_jwt')) startPolling(); else stopPolling();
+}
+window.checkAuth = checkAuthWrapper;
+
+// Ensure we start polling if adapter initialized and logged in
+document.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('admin_jwt')) startPolling();
+});
