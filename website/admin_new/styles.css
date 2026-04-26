@@ -32,3 +32,7 @@ body{font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var
 .ha-list{max-height:480px;overflow:auto}
 .ha-list .booking-item{padding:10px;border-radius:8px;border:1px solid #eef6fb;margin-bottom:8px}
 @media (max-width:900px){.ha-sidebar{display:none}.ha-hamburger{display:block}.ha-grid{grid-template-columns:1fr}}
+
+/* Clients grid specific */
+.clients-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px}
+.clients-grid .card{padding:12px;border-radius:10px;border:1px solid #eef6fb;background:#fff}
