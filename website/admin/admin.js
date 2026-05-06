@@ -69,13 +69,7 @@ document.addEventListener('DOMContentLoaded', initMobileMenu);
 // --- Admin Authentication ---
 async function adminLogin(username, password) {
     try {
-        const res = await fetch(`${API_BASE}/admin/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
-        if (!res.ok) throw new Error('Login failed');
-        const data = await res.json();
+        const data = await window.api.post('/admin/login', { username, password });
         setToken(data.token);
         showSuccess('Login successful!');
         await loadServices();
@@ -134,16 +128,16 @@ async function loadServices() {
     try {
         const res = await fetch(`${API_BASE}/services`);
         services = await res.json();
-    return services;
+        window._services = services;
         serviceList.innerHTML = '';
-        services.forEach((service, index) => {
+        services.forEach((service) => {
             const serviceItem = document.createElement('div');
             serviceItem.className = 'service-item';
             serviceItem.innerHTML = `
                 <div><strong>${service.name}</strong> - TSh ${service.price.toLocaleString()}</div>
                 <div>
-                    <button onclick="editService(${index})">Edit</button>
-                    <button onclick="deleteService(${index})">Delete</button>
+                    <button onclick="editService(${service.id})">Edit</button>
+                    <button onclick="deleteService(${service.id})">Delete</button>
                 </div>
             `;
             serviceList.appendChild(serviceItem);
@@ -271,8 +265,9 @@ async function addService() {
     }
 }
 
-async function editService(index) {
-    const service = services[index];
+async function editService(id) {
+    const service = (window._services || []).find(s => s.id === id);
+    if (!service) return showError('Service not found.');
     renderCrudModal({
         title: 'Edit Service',
         fields: [
@@ -284,7 +279,7 @@ async function editService(index) {
             const price = parseFloat(values.price);
             if (!name || isNaN(price) || price <= 0) return showError('Invalid input.');
             try {
-                const res = await fetch(`${API_BASE}/services/${service._id}`, {
+                const res = await fetch(`${API_BASE}/services/${service.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
                     body: JSON.stringify({ name, price })
@@ -299,11 +294,12 @@ async function editService(index) {
     });
 }
 
-async function deleteService(index) {
-    const service = services[index];
+async function deleteService(id) {
+    const service = (window._services || []).find(s => s.id === id);
+    if (!service) return showError('Service not found.');
     renderConfirm({ title: 'Delete Service', message: `Are you sure you want to delete "${escapeHtml(service.name)}"?`, onConfirm: async () => {
         try {
-            const res = await fetch(`${API_BASE}/services/${service._id}`, { method: 'DELETE', headers: getAuthHeaders() });
+            const res = await fetch(`${API_BASE}/services/${service.id}`, { method: 'DELETE', headers: getAuthHeaders() });
             if (!res.ok) throw new Error('Delete failed');
             showSuccess('Service deleted successfully!');
             await loadServices();
@@ -318,8 +314,8 @@ async function loadBookings() {
     const bookingsList = document.getElementById('bookingsList');
     if (!bookingsList) return;
     try {
-        const res = await fetch(`${API_BASE}/bookings`, { headers: getAuthHeaders() });
-        bookings = await res.json();
+        const bookings_data = await window.api.get('/bookings');
+        bookings = bookings_data;
         bookingsList.innerHTML = '';
         bookings.slice().reverse().forEach((booking, index) => {
             const item = document.createElement('div');
@@ -346,24 +342,40 @@ async function loadBookings() {
 // --- Analytics/statistics via API ---
 async function loadAnalytics() {
     try {
-        if (!bookings.length) await loadBookings();
-        // Stats
-        document.getElementById('totalBookings').textContent = bookings.length;
-        document.getElementById('pendingBookings').textContent = bookings.filter(b => b.status === 'pending').length;
-        // Revenue calculations
-        const today = new Date();
-        let todayRevenue = 0, monthRevenue = 0;
-        bookings.forEach(b => {
-            const d = new Date(b.createdAt);
-            if (d.toDateString() === today.toDateString()) {
-                todayRevenue += b.price || 0;
-            }
-            if (d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()) {
-                monthRevenue += b.price || 0;
-            }
-        });
-        document.getElementById('todayRevenue').textContent = 'TSh ' + todayRevenue.toLocaleString();
-        document.getElementById('monthlyRevenue').textContent = 'TSh ' + monthRevenue.toLocaleString();
+        const [overview, analyticsData] = await Promise.all([
+            window.api.get('/dashboard/overview').catch(() => null),
+            window.api.get('/dashboard/analytics').catch(() => null)
+        ]);
+
+        // Use overview data for stat cards if available
+        if (overview) {
+            const totalEl = document.getElementById('totalBookings');
+            const pendingEl = document.getElementById('pendingBookings');
+            const todayEl = document.getElementById('todayRevenue');
+            const monthEl = document.getElementById('monthlyRevenue');
+            if (totalEl) totalEl.textContent = overview.total_bookings || 0;
+            if (pendingEl) pendingEl.textContent = overview.pending_bookings || 0;
+            if (todayEl) todayEl.textContent = 'TSh ' + (overview.today_revenue_tsh || 0).toLocaleString();
+            if (monthEl) monthEl.textContent = 'TSh ' + (overview.monthly_revenue_tsh || 0).toLocaleString();
+        } else {
+            // Fallback: compute from bookings array if overview unavailable
+            if (!bookings.length) await loadBookings();
+            const totalEl = document.getElementById('totalBookings');
+            const pendingEl = document.getElementById('pendingBookings');
+            if (totalEl) totalEl.textContent = bookings.length;
+            if (pendingEl) pendingEl.textContent = bookings.filter(b => b.status === 'pending').length;
+            const today = new Date();
+            let todayRevenue = 0, monthRevenue = 0;
+            bookings.forEach(b => {
+                const d = new Date(b.created_at || b.createdAt);
+                if (d.toDateString() === today.toDateString()) todayRevenue += b.price || 0;
+                if (d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()) monthRevenue += b.price || 0;
+            });
+            const todayEl = document.getElementById('todayRevenue');
+            const monthEl = document.getElementById('monthlyRevenue');
+            if (todayEl) todayEl.textContent = 'TSh ' + todayRevenue.toLocaleString();
+            if (monthEl) monthEl.textContent = 'TSh ' + monthRevenue.toLocaleString();
+        }
     } catch (e) {
         showError('Failed to load analytics.');
     }

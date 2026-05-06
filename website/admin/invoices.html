@@ -1,120 +1,485 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Invoices — Hunter Auto</title>
-  <link rel="stylesheet" href="styles-clean.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Invoices — Hunter Auto Admin</title>
+  <link rel="stylesheet" href="styles-clean.css" />
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar" role="navigation" aria-label="Main navigation">
-      <div class="brand">
-        <img src="../images/logo.jpg" alt="logo" width="36" height="36" onerror="this.style.display='none'" />
-        <div>
-          <div style="font-weight:900">Hunter Auto</div>
-          <div class="small">Admin</div>
-        </div>
-      </div>
-
-      <nav class="nav">
-        <a href="index.html">Dashboard</a>
-        <a href="documents.html">Documents</a>
-        <a href="invoices.html" class="active">Invoices</a>
-        <a href="clients.html">Clients</a>
-        <a href="services.html">Services</a>
-        <a href="reports.html">Reports</a>
-        <a href="settings.html">Settings</a>
-      </nav>
-
-      <div class="small">v1.0 · Local-first · Supabase</div>
-    </aside>
-
     <main class="main-area">
-      <header class="topbar">
-        <div class="left">
-          <button id="hamburger" class="hamburger" aria-label="Open menu">☰</button>
-          <div class="brand"><h1>Invoices</h1></div>
+      <section class="main-content">
+        <div class="page-header">
+          <h1>Invoices</h1>
+          <button class="action-btn" id="newInvoiceBtn">+ New Invoice</button>
         </div>
-        <div class="actions">
-          <button id="btn-new-invoice" class="action-btn">New Invoice</button>
+        <div class="toolbar">
+          <select id="invoiceStatusFilter" class="toolbar-select" aria-label="Filter by status">
+            <option value="">All Statuses</option>
+            <option value="draft">Draft</option>
+            <option value="sent">Sent</option>
+            <option value="paid">Paid</option>
+            <option value="overdue">Overdue</option>
+          </select>
         </div>
-      </header>
-
-      <section class="content">
-        <div class="card" id="invoice-creator">
-          <h2>Create Invoice</h2>
-          <p>Create a new invoice for your clients.</p>
-          
-          <div class="form-row">
-            <label>Invoice No <input id="invoiceNo" type="text" placeholder="INV-2025-XXX"></label>
-            <label>Client <input id="invoiceClient" type="text" placeholder="Client name or ID"></label>
-          </div>
-          <div class="form-row">
-            <label>Date <input id="invoiceDate" type="date"></label>
-            <label>Due Date <input id="invoiceDueDate" type="date"></label>
-          </div>
-          <div class="form-section">
-            <label>Items</label>
-            <div class="form-row">
-              <div id="invoiceServiceList" class="service-checkbox-list"></div>
-              <div>
-                <div id="selectedServicesTotal">Selected: TSh 0</div>
-                <button id="addSelectedServiceBtn" class="action-btn">Add Selected</button>
-              </div>
-            </div>
-            <div id="invoiceItems"></div>
-            <button id="addInvoiceItemBtn" class="action-btn">Add Item</button>
-          </div>
-          <div class="form-row">
-            <label>Total (TSh) <input id="invoiceTotal" type="number"></label>
-          </div>
-          <div class="form-group">
-            <button id="saveInvoiceBtn" class="action-btn">Save Invoice (Local)</button>
-            <button id="syncInvoicesBtn" class="action-btn">Sync Now</button>
-          </div>
-        </div>
-
-        <div class="card" id="invoice-list">
-          <h2>Saved Invoices</h2>
-          <div id="invoicesList"></div>
+        <div class="data-table-wrapper">
+          <table class="data-table" aria-label="Invoices table">
+            <thead>
+              <tr>
+                <th>Invoice No</th>
+                <th>Client</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Total (TSh)</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="invoicesTbody">
+              <tr><td colspan="7" class="empty-table-row">Loading…</td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
     </main>
-
-    <div id="successMessage" class="message success" style="display:none"></div>
-    <div id="errorMessage" class="message error" style="display:none"></div>
   </div>
 
+  <!-- New/Edit Invoice Modal -->
+  <div class="modal-overlay" id="invoiceModal" role="dialog" aria-modal="true"
+       aria-labelledby="invoiceModalTitle" style="display:none">
+    <div class="modal-panel modal-panel-lg">
+      <div class="modal-header">
+        <h2 id="invoiceModalTitle">New Invoice</h2>
+        <button class="modal-close" id="invoiceModalClose" aria-label="Close">&times;</button>
+      </div>
+      <form id="invoiceForm" novalidate>
+        <div class="modal-body">
+          <input type="hidden" id="invoiceId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="invoiceNo">Invoice Number *</label>
+              <input type="text" id="invoiceNo" placeholder="INV-001" required />
+            </div>
+            <div class="form-group">
+              <label for="invoiceClientId">Client *</label>
+              <select id="invoiceClientId" required>
+                <option value="">Select client…</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="invoiceIssueDate">Issue Date</label>
+              <input type="date" id="invoiceIssueDate" />
+            </div>
+            <div class="form-group">
+              <label for="invoiceDueDate">Due Date</label>
+              <input type="date" id="invoiceDueDate" />
+            </div>
+            <div class="form-group">
+              <label for="invoiceStatus">Status</label>
+              <select id="invoiceStatus">
+                <option value="draft">Draft</option>
+                <option value="sent">Sent</option>
+                <option value="paid">Paid</option>
+                <option value="overdue">Overdue</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="invoicePaymentMethod">Payment Method</label>
+              <select id="invoicePaymentMethod">
+                <option value="">Select…</option>
+                <option value="cash">Cash</option>
+                <option value="mpesa">M-Pesa</option>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="card">Card</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Line Items -->
+          <div style="margin-top:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+              <h3 class="section-title" style="margin:0;">Line Items</h3>
+              <button type="button" class="compact-btn compact-btn-outline" id="addLineItemBtn">+ Add Item</button>
+            </div>
+            <table class="line-items-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th style="width:80px;">Qty</th>
+                  <th style="width:130px;">Unit Price (TSh)</th>
+                  <th style="width:130px;">Total (TSh)</th>
+                  <th style="width:40px;"></th>
+                </tr>
+              </thead>
+              <tbody id="lineItemsTbody"></tbody>
+            </table>
+            <div class="line-items-total">
+              <span>Total:</span>
+              <strong id="invoiceTotalDisplay">TSh 0</strong>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="compact-btn compact-btn-outline" id="invoiceModalCancel">Cancel</button>
+          <button type="submit" class="action-btn">Save Invoice</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mark as Paid Modal -->
+  <div class="modal-overlay" id="markPaidModal" role="dialog" aria-modal="true" style="display:none">
+    <div class="modal-panel modal-panel-sm">
+      <div class="modal-header">
+        <h2>Mark as Paid</h2>
+        <button class="modal-close" id="markPaidClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="markPaidInvoiceId" />
+        <div class="form-group">
+          <label for="paidDate">Payment Date</label>
+          <input type="date" id="paidDate" />
+        </div>
+        <div class="form-group">
+          <label for="paidMethod">Payment Method</label>
+          <select id="paidMethod">
+            <option value="cash">Cash</option>
+            <option value="mpesa">M-Pesa</option>
+            <option value="bank_transfer">Bank Transfer</option>
+            <option value="card">Card</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="paidAmount">Amount (TSh)</label>
+          <input type="number" id="paidAmount" placeholder="0" min="0" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="compact-btn compact-btn-outline" id="markPaidCancel">Cancel</button>
+        <button type="button" class="action-btn" id="markPaidConfirm">Mark Paid</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payments History Modal -->
+  <div class="modal-overlay" id="paymentsModal" role="dialog" aria-modal="true" style="display:none">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2>Payment History</h2>
+        <button class="modal-close" id="paymentsModalClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr><th>Date</th><th>Amount (TSh)</th><th>Method</th><th>Reference</th></tr>
+            </thead>
+            <tbody id="paymentsTbody">
+              <tr><td colspan="4" class="empty-table-row">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="compact-btn compact-btn-outline" id="paymentsModalCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="layout.js"></script>
   <script src="admin.js"></script>
   <script>
-    // Invoice-specific initialization (mobile menu is handled centrally in admin.js)
+    var allInvoices = [];
+    var allClients = [];
+
+    var STATUS_BADGE = {
+      draft: 'badge-warning',
+      sent: 'badge-primary',
+      paid: 'badge-success',
+      overdue: 'badge-danger'
+    };
+
+    async function loadInvoicesPage() {
+      var tbody = document.getElementById('invoicesTbody');
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-table-row">Loading…</td></tr>';
+      try {
+        var results = await Promise.all([
+          window.api.get('/invoices'),
+          window.api.get('/clients')
+        ]);
+        allInvoices = results[0];
+        allClients = results[1];
+        populateClientDropdown();
+        renderInvoicesTable(allInvoices);
+      } catch (err) {
+        tbody.innerHTML = '<tr class="empty-table-row"><td colspan="7">Failed to load: ' + escapeHtml(err.message) + '</td></tr>';
+      }
+    }
+
+    function populateClientDropdown() {
+      var sel = document.getElementById('invoiceClientId');
+      sel.innerHTML = '<option value="">Select client…</option>' +
+        allClients.map(function(c) {
+          return '<option value="' + c.id + '">' + escapeHtml(c.name) + '</option>';
+        }).join('');
+    }
+
+    function getClientName(clientId) {
+      var c = allClients.find(function(c) { return c.id === clientId; });
+      return c ? c.name : 'Unknown';
+    }
+
+    function renderInvoicesTable(invoices) {
+      var tbody = document.getElementById('invoicesTbody');
+      if (!invoices.length) {
+        tbody.innerHTML = '<tr class="empty-table-row"><td colspan="7">No invoices yet. Click New Invoice to create one.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = invoices.map(function(inv) {
+        var badgeCls = STATUS_BADGE[inv.status] || 'badge-warning';
+        var issueDate = inv.issue_date ? new Date(inv.issue_date).toLocaleDateString() : '-';
+        var dueDate = inv.due_date ? new Date(inv.due_date).toLocaleDateString() : '-';
+        return '<tr>' +
+          '<td><strong>' + escapeHtml(inv.invoice_no) + '</strong></td>' +
+          '<td>' + escapeHtml(getClientName(inv.client_id)) + '</td>' +
+          '<td>' + issueDate + '</td>' +
+          '<td>' + dueDate + '</td>' +
+          '<td>' + Number(inv.total_amount_tsh || 0).toLocaleString() + '</td>' +
+          '<td><span class="badge ' + badgeCls + '">' + escapeHtml(inv.status) + '</span></td>' +
+          '<td>' +
+            '<button class="btn-table-action btn-pay" onclick="openMarkPaid(' + inv.id + ')">Pay</button> ' +
+            '<button class="btn-table-action btn-view" onclick="openPayments(' + inv.id + ')">Payments</button> ' +
+            '<button class="btn-table-action btn-delete" onclick="deleteInvoiceById(' + inv.id + ')">Delete</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    // Status filter
+    document.getElementById('invoiceStatusFilter').addEventListener('change', function() {
+      var status = this.value;
+      var filtered = status ? allInvoices.filter(function(i) { return i.status === status; }) : allInvoices;
+      renderInvoicesTable(filtered);
+    });
+
+    // Line items
+    var lineItemCount = 0;
+
+    function addLineItem(desc, qty, unitPrice) {
+      lineItemCount++;
+      var id = 'li-' + lineItemCount;
+      var tbody = document.getElementById('lineItemsTbody');
+      var tr = document.createElement('tr');
+      tr.id = id;
+      tr.innerHTML =
+        '<td><input type="text" class="li-desc" placeholder="Description" value="' + escapeHtml(desc || '') + '" /></td>' +
+        '<td><input type="number" class="li-qty" value="' + (qty || 1) + '" min="1" /></td>' +
+        '<td><input type="number" class="li-unit" value="' + (unitPrice || 0) + '" min="0" /></td>' +
+        '<td class="li-total">' + ((qty||1) * (unitPrice||0)).toLocaleString() + '</td>' +
+        '<td><button type="button" class="btn-table-action btn-delete li-remove" data-id="' + id + '">✕</button></td>';
+      tbody.appendChild(tr);
+      tr.querySelector('.li-qty').addEventListener('input', updateLineItemTotal.bind(null, id));
+      tr.querySelector('.li-unit').addEventListener('input', updateLineItemTotal.bind(null, id));
+      tr.querySelector('.li-remove').addEventListener('click', function() {
+        document.getElementById(id).remove();
+        updateInvoiceGrandTotal();
+      });
+      updateLineItemTotal(id);
+    }
+
+    function updateLineItemTotal(id) {
+      var tr = document.getElementById(id);
+      if (!tr) return;
+      var qty = parseFloat(tr.querySelector('.li-qty').value) || 0;
+      var unit = parseFloat(tr.querySelector('.li-unit').value) || 0;
+      tr.querySelector('.li-total').textContent = (qty * unit).toLocaleString();
+      updateInvoiceGrandTotal();
+    }
+
+    function updateInvoiceGrandTotal() {
+      var rows = document.querySelectorAll('#lineItemsTbody tr');
+      var total = 0;
+      rows.forEach(function(tr) {
+        var qty = parseFloat(tr.querySelector('.li-qty') ? tr.querySelector('.li-qty').value : 0) || 0;
+        var unit = parseFloat(tr.querySelector('.li-unit') ? tr.querySelector('.li-unit').value : 0) || 0;
+        total += qty * unit;
+      });
+      document.getElementById('invoiceTotalDisplay').textContent = 'TSh ' + total.toLocaleString();
+      return total;
+    }
+
+    document.getElementById('addLineItemBtn').addEventListener('click', function() {
+      addLineItem('', 1, 0);
+    });
+
+    // Open new invoice modal
+    function openNewInvoiceModal() {
+      document.getElementById('invoiceModalTitle').textContent = 'New Invoice';
+      document.getElementById('invoiceId').value = '';
+      document.getElementById('invoiceNo').value = 'INV-' + Date.now().toString().slice(-6);
+      document.getElementById('invoiceClientId').value = '';
+      document.getElementById('invoiceIssueDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('invoiceDueDate').value = '';
+      document.getElementById('invoiceStatus').value = 'draft';
+      document.getElementById('invoicePaymentMethod').value = '';
+      document.getElementById('lineItemsTbody').innerHTML = '';
+      lineItemCount = 0;
+      addLineItem('', 1, 0);
+      updateInvoiceGrandTotal();
+      document.getElementById('invoiceModal').style.display = 'flex';
+    }
+
+    function closeInvoiceModal() { document.getElementById('invoiceModal').style.display = 'none'; }
+    document.getElementById('invoiceModalClose').addEventListener('click', closeInvoiceModal);
+    document.getElementById('invoiceModalCancel').addEventListener('click', closeInvoiceModal);
+    document.getElementById('invoiceModal').addEventListener('click', function(e) { if (e.target === this) closeInvoiceModal(); });
+
+    document.getElementById('invoiceForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var clientId = parseInt(document.getElementById('invoiceClientId').value);
+      if (!clientId) { showToast('Please select a client', 'error'); return; }
+      var rows = document.querySelectorAll('#lineItemsTbody tr');
+      if (!rows.length) { showToast('Please add at least one line item', 'error'); return; }
+
+      var items = [];
+      rows.forEach(function(tr) {
+        var desc = tr.querySelector('.li-desc').value.trim();
+        var qty = parseFloat(tr.querySelector('.li-qty').value) || 1;
+        var unit = parseFloat(tr.querySelector('.li-unit').value) || 0;
+        if (desc) items.push({ description: desc, quantity: qty, unit_price_tsh: unit, line_total_tsh: qty * unit });
+      });
+      if (!items.length) { showToast('Please fill in line item descriptions', 'error'); return; }
+
+      var total = items.reduce(function(s, i) { return s + i.line_total_tsh; }, 0);
+      var payload = {
+        invoice_no: document.getElementById('invoiceNo').value.trim(),
+        client_id: clientId,
+        status: document.getElementById('invoiceStatus').value,
+        issue_date: document.getElementById('invoiceIssueDate').value || null,
+        due_date: document.getElementById('invoiceDueDate').value || null,
+        total_amount_tsh: total,
+        payment_method: document.getElementById('invoicePaymentMethod').value || null,
+        items: items
+      };
+
+      try {
+        await window.api.post('/invoices', payload);
+        showToast('Invoice created successfully', 'success');
+        closeInvoiceModal();
+        loadInvoicesPage();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    });
+
+    // Mark as Paid
+    function openMarkPaid(invoiceId) {
+      document.getElementById('markPaidInvoiceId').value = invoiceId;
+      document.getElementById('paidDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('paidMethod').value = 'cash';
+      document.getElementById('paidAmount').value = '';
+      document.getElementById('markPaidModal').style.display = 'flex';
+    }
+
+    function closeMarkPaid() { document.getElementById('markPaidModal').style.display = 'none'; }
+    document.getElementById('markPaidClose').addEventListener('click', closeMarkPaid);
+    document.getElementById('markPaidCancel').addEventListener('click', closeMarkPaid);
+    document.getElementById('markPaidModal').addEventListener('click', function(e) { if (e.target === this) closeMarkPaid(); });
+
+    document.getElementById('markPaidConfirm').addEventListener('click', async function() {
+      var id = document.getElementById('markPaidInvoiceId').value;
+      var payload = {
+        paid_date: document.getElementById('paidDate').value,
+        payment_method: document.getElementById('paidMethod').value,
+        amount_tsh: parseInt(document.getElementById('paidAmount').value) || 0
+      };
+      try {
+        await window.api.post('/invoices/' + id + '/mark_paid', payload);
+        showToast('Invoice marked as paid', 'success');
+        closeMarkPaid();
+        loadInvoicesPage();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    });
+
+    // Payments history
+    async function openPayments(invoiceId) {
+      document.getElementById('paymentsTbody').innerHTML = '<tr><td colspan="4" class="empty-table-row">Loading…</td></tr>';
+      document.getElementById('paymentsModal').style.display = 'flex';
+      try {
+        var payments = await window.api.get('/payments?invoice_id=' + invoiceId);
+        var tbody = document.getElementById('paymentsTbody');
+        if (!payments.length) {
+          tbody.innerHTML = '<tr class="empty-table-row"><td colspan="4">No payments recorded</td></tr>';
+        } else {
+          tbody.innerHTML = payments.map(function(p) {
+            var date = new Date(p.payment_date || p.created_at).toLocaleDateString();
+            return '<tr><td>' + date + '</td><td>' + Number(p.amount_tsh).toLocaleString() + '</td><td>' + escapeHtml(p.method || '-') + '</td><td>' + escapeHtml(p.reference || '-') + '</td></tr>';
+          }).join('');
+        }
+      } catch (err) {
+        document.getElementById('paymentsTbody').innerHTML = '<tr class="empty-table-row"><td colspan="4">Error: ' + escapeHtml(err.message) + '</td></tr>';
+      }
+    }
+
+    function closePaymentsModal() { document.getElementById('paymentsModal').style.display = 'none'; }
+    document.getElementById('paymentsModalClose').addEventListener('click', closePaymentsModal);
+    document.getElementById('paymentsModalCloseBtn').addEventListener('click', closePaymentsModal);
+    document.getElementById('paymentsModal').addEventListener('click', function(e) { if (e.target === this) closePaymentsModal(); });
+
+    // Delete invoice
+    async function deleteInvoiceById(id) {
+      var confirmed = await confirmAction('Delete this invoice? This cannot be undone.');
+      if (!confirmed) return;
+      try {
+        await window.api.delete('/invoices/' + id);
+        showToast('Invoice deleted', 'success');
+        loadInvoicesPage();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    }
+
+    function showToast(message, type) {
+      type = type || 'info';
+      var container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+      var toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(function() { if (toast.parentNode) toast.remove(); }, 5000);
+    }
+
+    function confirmAction(message) {
+      return new Promise(function(resolve) {
+        var modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = '<div class="modal-panel modal-panel-sm"><div class="modal-header"><h2>Confirm</h2></div><div class="modal-body"><p>' + escapeHtml(message) + '</p></div><div class="modal-footer"><button class="compact-btn compact-btn-outline" id="confirmNo">Cancel</button><button class="action-btn" id="confirmYes">Confirm</button></div></div>';
+        document.body.appendChild(modal);
+        modal.querySelector('#confirmYes').onclick = function() { modal.remove(); resolve(true); };
+        modal.querySelector('#confirmNo').onclick = function() { modal.remove(); resolve(false); };
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s||'').replace(/[&<>"']/g, function(ch) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-      // initialize invoice UI elements referenced by admin.js
-      if (typeof loadDocumentsList === 'function') loadDocumentsList();
-
-      const addItemBtn = document.getElementById('addInvoiceItemBtn');
-      if (addItemBtn) {
-        addItemBtn.addEventListener('click', () => {
-          const itemsDiv = document.getElementById('invoiceItems');
-          const idx = itemsDiv.children.length;
-          const row = document.createElement('div');
-          row.innerHTML = `
-            <input placeholder="Description" class="item-desc">
-            <input type="number" placeholder="Qty" class="item-qty" value="1">
-            <input type="number" placeholder="Unit (TSh)" class="item-unit" value="0">
-            <button class="remove-item">Remove</button>
-          `;
-          itemsDiv.appendChild(row);
-          if (typeof attachItemRowListeners === 'function') attachItemRowListeners(row);
-          if (typeof updateInvoiceTotal === 'function') updateInvoiceTotal();
-        });
-      }
-
-      // Populate services checkbox list for invoices
-      if (typeof populateInvoiceServiceSelect === 'function') {
-        populateInvoiceServiceSelect('invoiceServiceList').then?.(() => {});
-      }
+      initLayout({ title: 'Invoices', activePage: 'invoices' });
+      document.getElementById('newInvoiceBtn').addEventListener('click', openNewInvoiceModal);
+      loadInvoicesPage();
     });
   </script>
 </body>

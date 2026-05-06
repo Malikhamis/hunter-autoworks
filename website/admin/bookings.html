@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bookings — Hunter Auto Admin</title>
+  <link rel="stylesheet" href="styles-clean.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <main class="main-area">
+      <section class="main-content">
+        <div class="page-header">
+          <h1>Bookings</h1>
+          <button class="compact-btn compact-btn-outline" id="refreshBtn">🔄 Refresh</button>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="bookingSearch" class="toolbar-search"
+            placeholder="Search by name, phone or service…" aria-label="Search bookings" />
+          <select id="statusFilter" class="toolbar-select" aria-label="Filter by status">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="data-table-wrapper">
+          <table class="data-table" aria-label="Bookings table">
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Vehicle</th>
+                <th>Service</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTbody">
+              <tr><td colspan="8" class="empty-table-row">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Booking Details Modal -->
+  <div class="modal-overlay" id="bookingModal" role="dialog" aria-modal="true"
+       aria-labelledby="bookingModalTitle" style="display:none">
+    <div class="modal-panel modal-panel-lg">
+      <div class="modal-header">
+        <h2 id="bookingModalTitle">Booking Details</h2>
+        <button class="modal-close" id="bookingModalClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid" id="bookingDetailGrid"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="compact-btn compact-btn-outline" id="bookingModalCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="layout.js"></script>
+  <script src="admin.js"></script>
+  <script>
+    var allBookings = [];
+    var pollTimer = null;
+    var lastBookingCount = 0;
+
+    var STATUS_BADGE = {
+      pending: 'badge-warning',
+      confirmed: 'badge-primary',
+      'in-progress': 'badge-purple',
+      completed: 'badge-success',
+      cancelled: 'badge-danger'
+    };
+
+    var VALID_STATUSES = ['pending', 'confirmed', 'in-progress', 'completed', 'cancelled'];
+
+    async function loadBookingsPage(silent) {
+      if (!silent) {
+        var tbody = document.getElementById('bookingsTbody');
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-table-row">Loading…</td></tr>';
+      }
+      try {
+        var bookings = await window.api.get('/bookings');
+        // Check for new bookings (polling notification)
+        if (silent && bookings.length > lastBookingCount && lastBookingCount > 0) {
+          showToast('New booking received!', 'info');
+        }
+        lastBookingCount = bookings.length;
+        allBookings = bookings;
+        applyFilters();
+      } catch (err) {
+        if (!silent) {
+          document.getElementById('bookingsTbody').innerHTML =
+            '<tr class="empty-table-row"><td colspan="8">Failed to load: ' + escapeHtml(err.message) + '</td></tr>';
+        }
+        stopPolling();
+      }
+    }
+
+    function applyFilters() {
+      var q = document.getElementById('bookingSearch').value.toLowerCase();
+      var status = document.getElementById('statusFilter').value;
+      var filtered = allBookings.filter(function(b) {
+        var name = ((b.first_name||'') + ' ' + (b.last_name||'')).toLowerCase();
+        var matchQ = !q || name.includes(q) || (b.phone||'').includes(q) || (b.service||'').toLowerCase().includes(q);
+        var matchStatus = !status || b.status === status;
+        return matchQ && matchStatus;
+      });
+      renderBookingsTable(filtered);
+    }
+
+    function renderBookingsTable(bookings) {
+      var tbody = document.getElementById('bookingsTbody');
+      if (!bookings.length) {
+        tbody.innerHTML = '<tr class="empty-table-row"><td colspan="8">No bookings found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = bookings.map(function(b) {
+        var name = [b.first_name, b.last_name].filter(Boolean).join(' ') || 'Unknown';
+        var vehicle = [b.vehicle_year, b.vehicle_make, b.vehicle_model].filter(Boolean).join(' ') || '-';
+        var date = b.booking_date ? new Date(b.booking_date).toLocaleDateString() : new Date(b.created_at).toLocaleDateString();
+        var badgeCls = STATUS_BADGE[b.status] || 'badge-warning';
+        var statusOptions = VALID_STATUSES.map(function(s) {
+          return '<option value="' + s + '"' + (b.status === s ? ' selected' : '') + '>' + s + '</option>';
+        }).join('');
+        return '<tr>' +
+          '<td><strong>' + escapeHtml(String(b.booking_id || b.id)) + '</strong></td>' +
+          '<td><a href="#" onclick="viewBooking(' + b.id + ');return false;" style="color:var(--primary);text-decoration:none;">' + escapeHtml(name) + '</a></td>' +
+          '<td>' + escapeHtml(b.phone || '-') + '</td>' +
+          '<td>' + escapeHtml(vehicle) + '</td>' +
+          '<td>' + escapeHtml(b.service || '-') + '</td>' +
+          '<td>' + date + '</td>' +
+          '<td><span class="badge ' + badgeCls + '">' + escapeHtml(b.status || 'pending') + '</span></td>' +
+          '<td>' +
+            '<select class="status-select" onchange="updateBookingStatus(' + b.id + ', this.value)">' + statusOptions + '</select> ' +
+            '<button class="btn-table-action btn-delete" onclick="deleteBookingById(' + b.id + ')">Delete</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    async function updateBookingStatus(id, status) {
+      try {
+        await window.api.put('/bookings/' + id, { status: status });
+        showToast('Status updated to ' + status, 'success');
+        // Update local data without full reload
+        var booking = allBookings.find(function(b) { return b.id === id; });
+        if (booking) booking.status = status;
+        applyFilters();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+        loadBookingsPage(false); // reload to reset dropdown
+      }
+    }
+
+    function viewBooking(id) {
+      var b = allBookings.find(function(b) { return b.id === id; });
+      if (!b) return;
+      document.getElementById('bookingModalTitle').textContent = 'Booking — ' + (b.booking_id || b.id);
+      var grid = document.getElementById('bookingDetailGrid');
+      var fields = [
+        ['Booking ID', b.booking_id || b.id],
+        ['First Name', b.first_name || '-'],
+        ['Last Name', b.last_name || '-'],
+        ['Phone', b.phone || '-'],
+        ['Email', b.email || '-'],
+        ['Vehicle Make', b.vehicle_make || '-'],
+        ['Vehicle Model', b.vehicle_model || '-'],
+        ['Vehicle Year', b.vehicle_year || '-'],
+        ['Service', b.service || '-'],
+        ['Date', b.booking_date ? new Date(b.booking_date).toLocaleDateString() : '-'],
+        ['Time Slot', b.time_slot || '-'],
+        ['Status', b.status || 'pending'],
+        ['Message', b.message || '-'],
+        ['Created', new Date(b.created_at).toLocaleString()]
+      ];
+      grid.innerHTML = fields.map(function(f) {
+        return '<div class="detail-item"><label>' + escapeHtml(f[0]) + '</label><p>' + escapeHtml(String(f[1])) + '</p></div>';
+      }).join('');
+      document.getElementById('bookingModal').style.display = 'flex';
+    }
+
+    async function deleteBookingById(id) {
+      var confirmed = await confirmAction('Delete this booking? This cannot be undone.');
+      if (!confirmed) return;
+      try {
+        await window.api.delete('/bookings/' + id);
+        showToast('Booking deleted', 'success');
+        allBookings = allBookings.filter(function(b) { return b.id !== id; });
+        lastBookingCount = allBookings.length;
+        applyFilters();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    }
+
+    // Polling
+    function startPolling() {
+      stopPolling();
+      pollTimer = setInterval(function() {
+        loadBookingsPage(true);
+      }, 30000);
+    }
+
+    function stopPolling() {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    }
+
+    // Search & filter
+    var searchTimer;
+    document.getElementById('bookingSearch').addEventListener('input', function() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(applyFilters, 300);
+    });
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    document.getElementById('refreshBtn').addEventListener('click', function() { loadBookingsPage(false); });
+
+    // Modal
+    function closeBookingModal() { document.getElementById('bookingModal').style.display = 'none'; }
+    document.getElementById('bookingModalClose').addEventListener('click', closeBookingModal);
+    document.getElementById('bookingModalCloseBtn').addEventListener('click', closeBookingModal);
+    document.getElementById('bookingModal').addEventListener('click', function(e) { if (e.target === this) closeBookingModal(); });
+
+    // Stop polling when page hidden
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) stopPolling(); else startPolling();
+    });
+
+    function showToast(message, type) {
+      type = type || 'info';
+      var container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+      var toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(function() { if (toast.parentNode) toast.remove(); }, 5000);
+    }
+
+    function confirmAction(message) {
+      return new Promise(function(resolve) {
+        var modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = '<div class="modal-panel modal-panel-sm"><div class="modal-header"><h2>Confirm</h2></div><div class="modal-body"><p>' + escapeHtml(message) + '</p></div><div class="modal-footer"><button class="compact-btn compact-btn-outline" id="confirmNo">Cancel</button><button class="action-btn" id="confirmYes">Confirm</button></div></div>';
+        document.body.appendChild(modal);
+        modal.querySelector('#confirmYes').onclick = function() { modal.remove(); resolve(true); };
+        modal.querySelector('#confirmNo').onclick = function() { modal.remove(); resolve(false); };
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s||'').replace(/[&<>"']/g, function(ch) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout({ title: 'Bookings', activePage: 'bookings' });
+      loadBookingsPage(false);
+      startPolling();
+    });
+  </script>
+</body>
+</html>

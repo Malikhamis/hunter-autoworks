@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quotes — Hunter Auto Admin</title>
+  <link rel="stylesheet" href="styles-clean.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <main class="main-area">
+      <section class="main-content">
+        <div class="page-header">
+          <h1>Quote Requests</h1>
+          <button class="compact-btn compact-btn-outline" id="refreshQuotesBtn">🔄 Refresh</button>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="quoteSearch" class="toolbar-search"
+            placeholder="Search by name, phone or service…" aria-label="Search quotes" />
+          <select id="quoteStatusFilter" class="toolbar-select" aria-label="Filter by status">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="converted">Converted</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="data-table-wrapper">
+          <table class="data-table" aria-label="Quotes table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Vehicle</th>
+                <th>Service</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="quotesTbody">
+              <tr><td colspan="8" class="empty-table-row">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Convert to Booking Modal -->
+  <div class="modal-overlay" id="convertModal" role="dialog" aria-modal="true"
+       aria-labelledby="convertModalTitle" style="display:none">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="convertModalTitle">Convert to Booking</h2>
+        <button class="modal-close" id="convertModalClose" aria-label="Close">&times;</button>
+      </div>
+      <form id="convertForm" novalidate>
+        <div class="modal-body">
+          <input type="hidden" id="convertQuoteId" />
+          <div class="form-group">
+            <label for="convertFirstName">First Name *</label>
+            <input type="text" id="convertFirstName" required />
+          </div>
+          <div class="form-group">
+            <label for="convertLastName">Last Name</label>
+            <input type="text" id="convertLastName" />
+          </div>
+          <div class="form-group">
+            <label for="convertPhone">Phone *</label>
+            <input type="tel" id="convertPhone" required />
+          </div>
+          <div class="form-group">
+            <label for="convertEmail">Email</label>
+            <input type="email" id="convertEmail" />
+          </div>
+          <div class="form-group">
+            <label for="convertService">Service *</label>
+            <input type="text" id="convertService" required />
+          </div>
+          <div class="form-group">
+            <label for="convertDate">Preferred Date</label>
+            <input type="date" id="convertDate" />
+          </div>
+          <div class="form-group">
+            <label for="convertMessage">Notes</label>
+            <textarea id="convertMessage" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="compact-btn compact-btn-outline" id="convertModalCancel">Cancel</button>
+          <button type="submit" class="action-btn">Create Booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="layout.js"></script>
+  <script src="admin.js"></script>
+  <script>
+    var allQuotes = [];
+
+    var STATUS_BADGE = {
+      pending: 'badge-warning',
+      reviewed: 'badge-primary',
+      converted: 'badge-success',
+      rejected: 'badge-danger'
+    };
+
+    async function loadQuotesPage() {
+      var tbody = document.getElementById('quotesTbody');
+      tbody.innerHTML = '<tr><td colspan="8" class="empty-table-row">Loading…</td></tr>';
+      try {
+        allQuotes = await window.api.get('/quotes');
+        applyQuoteFilters();
+      } catch (err) {
+        tbody.innerHTML = '<tr class="empty-table-row"><td colspan="8">Failed to load: ' + escapeHtml(err.message) + '</td></tr>';
+      }
+    }
+
+    function applyQuoteFilters() {
+      var q = document.getElementById('quoteSearch').value.toLowerCase();
+      var status = document.getElementById('quoteStatusFilter').value;
+      var filtered = allQuotes.filter(function(qt) {
+        var matchQ = !q || (qt.name||'').toLowerCase().includes(q) || (qt.phone||'').includes(q) || (qt.service||'').toLowerCase().includes(q);
+        var matchStatus = !status || qt.status === status;
+        return matchQ && matchStatus;
+      });
+      renderQuotesTable(filtered);
+    }
+
+    function renderQuotesTable(quotes) {
+      var tbody = document.getElementById('quotesTbody');
+      if (!quotes.length) {
+        tbody.innerHTML = '<tr class="empty-table-row"><td colspan="8">No quote requests found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = quotes.map(function(qt) {
+        var badgeCls = STATUS_BADGE[qt.status] || 'badge-warning';
+        var date = new Date(qt.created_at).toLocaleDateString();
+        var statusOptions = ['pending','reviewed','converted','rejected'].map(function(s) {
+          return '<option value="' + s + '"' + (qt.status === s ? ' selected' : '') + '>' + s + '</option>';
+        }).join('');
+        return '<tr>' +
+          '<td>' + qt.id + '</td>' +
+          '<td><strong>' + escapeHtml(qt.name || '-') + '</strong></td>' +
+          '<td>' + escapeHtml(qt.phone || '-') + '</td>' +
+          '<td>' + escapeHtml(qt.vehicle || '-') + '</td>' +
+          '<td>' + escapeHtml(qt.service || '-') + '</td>' +
+          '<td><span class="badge ' + badgeCls + '">' + escapeHtml(qt.status || 'pending') + '</span></td>' +
+          '<td>' + date + '</td>' +
+          '<td>' +
+            '<select class="status-select" onchange="updateQuoteStatus(' + qt.id + ', this.value)">' + statusOptions + '</select> ' +
+            '<button class="btn-table-action btn-convert" onclick="openConvertModal(' + qt.id + ')">Convert</button> ' +
+            '<button class="btn-table-action btn-delete" onclick="deleteQuoteById(' + qt.id + ')">Delete</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    async function updateQuoteStatus(id, status) {
+      try {
+        await window.api.put('/quotes/' + id, { status: status });
+        showToast('Status updated to ' + status, 'success');
+        var qt = allQuotes.find(function(q) { return q.id === id; });
+        if (qt) qt.status = status;
+        applyQuoteFilters();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+        loadQuotesPage();
+      }
+    }
+
+    function openConvertModal(id) {
+      var qt = allQuotes.find(function(q) { return q.id === id; });
+      if (!qt) return;
+      document.getElementById('convertQuoteId').value = id;
+      // Pre-fill from quote data
+      var nameParts = (qt.name || '').split(' ');
+      document.getElementById('convertFirstName').value = nameParts[0] || '';
+      document.getElementById('convertLastName').value = nameParts.slice(1).join(' ') || '';
+      document.getElementById('convertPhone').value = qt.phone || '';
+      document.getElementById('convertEmail').value = qt.email || '';
+      document.getElementById('convertService').value = qt.service || '';
+      document.getElementById('convertDate').value = '';
+      document.getElementById('convertMessage').value = qt.message || '';
+      document.getElementById('convertModal').style.display = 'flex';
+    }
+
+    function closeConvertModal() { document.getElementById('convertModal').style.display = 'none'; }
+    document.getElementById('convertModalClose').addEventListener('click', closeConvertModal);
+    document.getElementById('convertModalCancel').addEventListener('click', closeConvertModal);
+    document.getElementById('convertModal').addEventListener('click', function(e) { if (e.target === this) closeConvertModal(); });
+
+    document.getElementById('convertForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var quoteId = document.getElementById('convertQuoteId').value;
+      var firstName = document.getElementById('convertFirstName').value.trim();
+      var phone = document.getElementById('convertPhone').value.trim();
+      var service = document.getElementById('convertService').value.trim();
+      if (!firstName || !phone || !service) {
+        showToast('First name, phone and service are required', 'error');
+        return;
+      }
+      var bookingData = {
+        bookingId: 'HA' + Date.now(),
+        firstName: firstName,
+        lastName: document.getElementById('convertLastName').value.trim(),
+        phone: phone,
+        email: document.getElementById('convertEmail').value.trim(),
+        service: service,
+        date: document.getElementById('convertDate').value || null,
+        message: document.getElementById('convertMessage').value.trim(),
+        status: 'pending'
+      };
+      try {
+        await window.api.post('/bookings', bookingData);
+        await window.api.put('/quotes/' + quoteId, { status: 'converted' });
+        showToast('Booking created and quote marked as converted', 'success');
+        closeConvertModal();
+        loadQuotesPage();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    });
+
+    async function deleteQuoteById(id) {
+      var confirmed = await confirmAction('Delete this quote request? This cannot be undone.');
+      if (!confirmed) return;
+      try {
+        await window.api.delete('/quotes/' + id);
+        showToast('Quote deleted', 'success');
+        allQuotes = allQuotes.filter(function(q) { return q.id !== id; });
+        applyQuoteFilters();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    }
+
+    var searchTimer;
+    document.getElementById('quoteSearch').addEventListener('input', function() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(applyQuoteFilters, 300);
+    });
+    document.getElementById('quoteStatusFilter').addEventListener('change', applyQuoteFilters);
+    document.getElementById('refreshQuotesBtn').addEventListener('click', loadQuotesPage);
+
+    function showToast(message, type) {
+      type = type || 'info';
+      var container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+      var toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(function() { if (toast.parentNode) toast.remove(); }, 5000);
+    }
+
+    function confirmAction(message) {
+      return new Promise(function(resolve) {
+        var modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = '<div class="modal-panel modal-panel-sm"><div class="modal-header"><h2>Confirm</h2></div><div class="modal-body"><p>' + escapeHtml(message) + '</p></div><div class="modal-footer"><button class="compact-btn compact-btn-outline" id="confirmNo">Cancel</button><button class="action-btn" id="confirmYes">Confirm</button></div></div>';
+        document.body.appendChild(modal);
+        modal.querySelector('#confirmYes').onclick = function() { modal.remove(); resolve(true); };
+        modal.querySelector('#confirmNo').onclick = function() { modal.remove(); resolve(false); };
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s||'').replace(/[&<>"']/g, function(ch) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout({ title: 'Quotes', activePage: 'quotes' });
+      loadQuotesPage();
+    });
+  </script>
+</body>
+</html>

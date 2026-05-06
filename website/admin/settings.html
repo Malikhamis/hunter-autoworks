@@ -1,48 +1,189 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Settings — Hunter Auto</title>
-    <link rel="stylesheet" href="styles-clean.css" />
-  </head>
-  <body>
-    <div class="app-shell">
-      <aside class="sidebar" role="navigation">
-        <div class="brand"><div style="font-weight:900">Hunter Auto</div><div class="small">Admin</div></div>
-        <nav class="nav">
-          <a href="dashboard.html">Dashboard</a>
-          <a href="documents.html">Documents</a>
-          <a href="invoices.html">Invoices</a>
-          <a href="clients.html">Clients</a>
-          <a href="services.html">Services</a>
-          <a href="reports.html">Reports</a>
-          <a href="settings.html" class="active">Settings</a>
-        </nav>
-      </aside>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings — Hunter Auto Admin</title>
+  <link rel="stylesheet" href="styles-clean.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <main class="main-area">
+      <section class="main-content">
+        <div class="page-header">
+          <h1>Settings</h1>
+        </div>
 
-      <main class="main-area">
-        <header class="topbar">
-          <div class="left">
-            <button id="hamburger" class="hamburger" aria-label="Open menu">☰</button>
-            <div class="brand"><h1>Settings</h1></div>
-          </div>
-        </header>
-        <section style="padding:18px">
-          <div class="card">
-            <h3>Application Settings</h3>
-            <p>Configure Supabase connection, company details and invoice defaults here.</p>
-            <div id="settings-form"></div>
-          </div>
-        </section>
-      </main>
-    </div>
+        <!-- Change Password -->
+        <div class="settings-section">
+          <h2>Change Password</h2>
+          <div id="passwordSuccess" class="success-message"></div>
+          <div id="passwordError" class="error-message"></div>
+          <form id="passwordForm" novalidate>
+            <div class="form-group">
+              <label for="currentPassword">Current Password</label>
+              <input type="password" id="currentPassword" required autocomplete="current-password"
+                     placeholder="Enter current password" />
+            </div>
+            <div class="form-group">
+              <label for="newPassword">New Password</label>
+              <input type="password" id="newPassword" required autocomplete="new-password"
+                     placeholder="Minimum 8 characters" minlength="8" />
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Confirm New Password</label>
+              <input type="password" id="confirmPassword" required autocomplete="new-password"
+                     placeholder="Repeat new password" />
+            </div>
+            <button type="submit" class="action-btn" id="passwordSubmitBtn">Update Password</button>
+          </form>
+        </div>
 
-    <script src="admin.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded',()=>{
-        // settings page initializers can be added to admin.js
-      });
-    </script>
-  </body>
+        <!-- Business Information -->
+        <div class="settings-section">
+          <h2>Business Information</h2>
+          <p style="color:var(--text-muted);font-size:var(--text-sm);margin-bottom:1.5rem;">
+            This information appears on generated documents (invoices, estimates, quotes).
+          </p>
+          <div id="bizSuccess" class="success-message"></div>
+          <form id="bizForm" novalidate>
+            <div class="form-group">
+              <label for="bizName">Business Name</label>
+              <input type="text" id="bizName" placeholder="Hunter Autoworks" />
+            </div>
+            <div class="form-group">
+              <label for="bizPhone">Phone</label>
+              <input type="tel" id="bizPhone" placeholder="+255 627 629 345" />
+            </div>
+            <div class="form-group">
+              <label for="bizAddress">Address</label>
+              <input type="text" id="bizAddress" placeholder="Dar es Salaam, Tanzania" />
+            </div>
+            <div class="form-group">
+              <label for="bizLogoUrl">Logo URL</label>
+              <input type="url" id="bizLogoUrl" placeholder="https://…/logo.jpg" />
+            </div>
+            <button type="submit" class="action-btn">Save Business Info</button>
+          </form>
+        </div>
+
+        <!-- Appearance -->
+        <div class="settings-section">
+          <h2>Appearance</h2>
+          <div class="toggle-setting">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <div style="font-weight:var(--font-semibold);">Dark Mode</div>
+                <div style="font-size:var(--text-sm);color:var(--text-muted);">Switch between light and dark theme</div>
+              </div>
+              <label class="toggle-switch" aria-label="Toggle dark mode">
+                <input type="checkbox" id="darkModeToggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="layout.js"></script>
+  <script src="admin.js"></script>
+  <script>
+    // ===== Change Password =====
+    document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var currentPassword = document.getElementById('currentPassword').value;
+      var newPassword = document.getElementById('newPassword').value;
+      var confirmPassword = document.getElementById('confirmPassword').value;
+      var successEl = document.getElementById('passwordSuccess');
+      var errorEl = document.getElementById('passwordError');
+      successEl.style.display = 'none';
+      errorEl.style.display = 'none';
+
+      if (newPassword.length < 8) {
+        errorEl.textContent = 'New password must be at least 8 characters';
+        errorEl.style.display = 'block';
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        errorEl.textContent = 'Passwords do not match';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      var btn = document.getElementById('passwordSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Updating…';
+
+      try {
+        await window.api.put('/admin/password', {
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+          confirmPassword: confirmPassword
+        });
+        successEl.textContent = 'Password updated successfully';
+        successEl.style.display = 'block';
+        document.getElementById('passwordForm').reset();
+        setTimeout(function() { successEl.style.display = 'none'; }, 4000);
+      } catch (err) {
+        errorEl.textContent = err.message || 'Failed to update password';
+        errorEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Update Password';
+      }
+    });
+
+    // ===== Business Information =====
+    function loadBizSettings() {
+      var settings = JSON.parse(localStorage.getItem('business_settings') || '{}');
+      document.getElementById('bizName').value = settings.name || '';
+      document.getElementById('bizPhone').value = settings.phone || '';
+      document.getElementById('bizAddress').value = settings.address || '';
+      document.getElementById('bizLogoUrl').value = settings.logoUrl || '';
+    }
+
+    document.getElementById('bizForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var settings = {
+        name: document.getElementById('bizName').value.trim() || 'Hunter Autoworks',
+        phone: document.getElementById('bizPhone').value.trim(),
+        address: document.getElementById('bizAddress').value.trim(),
+        logoUrl: document.getElementById('bizLogoUrl').value.trim()
+      };
+      localStorage.setItem('business_settings', JSON.stringify(settings));
+      var successEl = document.getElementById('bizSuccess');
+      successEl.textContent = 'Business information saved';
+      successEl.style.display = 'block';
+      setTimeout(function() { successEl.style.display = 'none'; }, 3000);
+    });
+
+    // ===== Dark Mode =====
+    function applyDarkMode(enabled) {
+      if (enabled) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+      localStorage.setItem('dark_mode', enabled ? '1' : '0');
+    }
+
+    document.getElementById('darkModeToggle').addEventListener('change', function() {
+      applyDarkMode(this.checked);
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout({ title: 'Settings', activePage: 'settings' });
+      loadBizSettings();
+
+      // Restore dark mode preference
+      var darkMode = localStorage.getItem('dark_mode') === '1';
+      document.getElementById('darkModeToggle').checked = darkMode;
+      applyDarkMode(darkMode);
+    });
+  </script>
+</body>
 </html>

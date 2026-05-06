@@ -1,45 +1,297 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Clients — Hunter Auto</title>
-    <link rel="stylesheet" href="styles-clean.css" />
-  </head>
-  <body>
-    <div class="app-shell">
-      <aside class="sidebar" role="navigation">
-        <div class="brand"><div style="font-weight:900">Hunter Auto</div><div class="small">Admin</div></div>
-        <nav class="nav">
-          <a href="dashboard.html">Dashboard</a>
-          <a href="documents.html">Documents</a>
-          <a href="invoices.html">Invoices</a>
-          <a href="clients.html" class="active">Clients</a>
-          <a href="services.html">Services</a>
-          <a href="reports.html">Reports</a>
-          <a href="settings.html">Settings</a>
-        </nav>
-      </aside>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clients — Hunter Auto Admin</title>
+  <link rel="stylesheet" href="styles-clean.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <main class="main-area">
+      <section class="main-content">
+        <div class="page-header">
+          <h1>Clients</h1>
+          <button class="action-btn" id="newClientBtn">+ New Client</button>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="clientSearch" class="toolbar-search"
+            placeholder="Search by name, phone or email…" aria-label="Search clients" />
+        </div>
+        <div class="data-table-wrapper">
+          <table class="data-table" aria-label="Clients table">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Email</th>
+                <th scope="col">Address</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="clientsTbody">
+              <tr><td colspan="5" class="empty-table-row">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
 
-      <main class="main-area">
-        <header class="topbar">
-          <div class="left">
-            <button id="hamburger" class="hamburger" aria-label="Open menu">☰</button>
-            <div class="brand"><h1>Clients</h1></div>
+  <!-- Client Modal -->
+  <div class="modal-overlay" id="clientModal" role="dialog" aria-modal="true"
+       aria-labelledby="clientModalTitle" style="display:none">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="clientModalTitle">New Client</h2>
+        <button class="modal-close" id="clientModalClose" aria-label="Close">&times;</button>
+      </div>
+      <form id="clientForm" novalidate>
+        <div class="modal-body">
+          <input type="hidden" id="clientId" />
+          <div class="form-group">
+            <label for="clientName">Name *</label>
+            <input type="text" id="clientName" placeholder="Full name" required />
           </div>
-          <div class="actions"><button id="btn-new-client">New Client</button></div>
-        </header>
-        <section style="padding:18px">
-          <div id="clients-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px"></div>
-        </section>
-      </main>
+          <div class="form-group">
+            <label for="clientPhone">Phone</label>
+            <input type="tel" id="clientPhone" placeholder="+255 7XX XXX XXX" />
+          </div>
+          <div class="form-group">
+            <label for="clientEmail">Email</label>
+            <input type="email" id="clientEmail" placeholder="client@example.com" />
+          </div>
+          <div class="form-group">
+            <label for="clientAddress">Address</label>
+            <input type="text" id="clientAddress" placeholder="Street, City" />
+          </div>
+          <div class="form-group">
+            <label for="clientNotes">Notes</label>
+            <textarea id="clientNotes" rows="3" placeholder="Any additional notes…"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="compact-btn compact-btn-outline" id="clientModalCancel">Cancel</button>
+          <button type="submit" class="action-btn">Save Client</button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <script src="admin.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded',()=>{
-        if (typeof initClientsPage === 'function') initClientsPage();
+  <!-- History Modal -->
+  <div class="modal-overlay" id="historyModal" role="dialog" aria-modal="true"
+       aria-labelledby="historyModalTitle" style="display:none">
+    <div class="modal-panel modal-panel-lg">
+      <div class="modal-header">
+        <h2 id="historyModalTitle">Booking History</h2>
+        <button class="modal-close" id="historyModalClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Service</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="historyTbody">
+              <tr><td colspan="4" class="empty-table-row">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="compact-btn compact-btn-outline" id="historyModalCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="layout.js"></script>
+  <script src="admin.js"></script>
+  <script>
+    var allClients = [];
+
+    async function loadClientsPage() {
+      var tbody = document.getElementById('clientsTbody');
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-table-row">Loading…</td></tr>';
+      try {
+        allClients = await window.api.get('/clients');
+        renderClientsTable(allClients);
+      } catch (err) {
+        tbody.innerHTML = '<tr class="empty-table-row"><td colspan="5">Failed to load clients: ' + escapeHtml(err.message) + '</td></tr>';
+      }
+    }
+
+    function renderClientsTable(clients) {
+      var tbody = document.getElementById('clientsTbody');
+      if (!clients.length) {
+        tbody.innerHTML = '<tr class="empty-table-row"><td colspan="5">No clients yet. Click New Client to add one.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = clients.map(function(c) {
+        return '<tr>' +
+          '<td><strong>' + escapeHtml(c.name) + '</strong></td>' +
+          '<td>' + escapeHtml(c.contact_phone || '-') + '</td>' +
+          '<td>' + escapeHtml(c.contact_email || '-') + '</td>' +
+          '<td>' + escapeHtml(c.address || '-') + '</td>' +
+          '<td>' +
+            '<button class="btn-table-action btn-edit" onclick="openClientModal(' + c.id + ')">Edit</button> ' +
+            '<button class="btn-table-action btn-view" onclick="viewClientHistory(' + c.id + ')">History</button> ' +
+            '<button class="btn-table-action btn-delete" onclick="deleteClientById(' + c.id + ')">Delete</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    var searchTimer;
+    document.getElementById('clientSearch').addEventListener('input', function() {
+      clearTimeout(searchTimer);
+      var q = this.value.toLowerCase();
+      searchTimer = setTimeout(function() {
+        var filtered = allClients.filter(function(c) {
+          return (c.name||'').toLowerCase().includes(q) ||
+                 (c.contact_phone||'').toLowerCase().includes(q) ||
+                 (c.contact_email||'').toLowerCase().includes(q);
+        });
+        renderClientsTable(filtered);
+      }, 300);
+    });
+
+    function openClientModal(id) {
+      var client = id ? allClients.find(function(c) { return c.id === id; }) : null;
+      document.getElementById('clientModalTitle').textContent = client ? 'Edit Client' : 'New Client';
+      document.getElementById('clientId').value = client ? client.id : '';
+      document.getElementById('clientName').value = client ? client.name : '';
+      document.getElementById('clientPhone').value = client ? (client.contact_phone || '') : '';
+      document.getElementById('clientEmail').value = client ? (client.contact_email || '') : '';
+      document.getElementById('clientAddress').value = client ? (client.address || '') : '';
+      document.getElementById('clientNotes').value = client ? (client.notes || '') : '';
+      document.getElementById('clientModal').style.display = 'flex';
+    }
+
+    function closeClientModal() {
+      document.getElementById('clientModal').style.display = 'none';
+    }
+
+    document.getElementById('clientModalClose').addEventListener('click', closeClientModal);
+    document.getElementById('clientModalCancel').addEventListener('click', closeClientModal);
+    document.getElementById('clientModal').addEventListener('click', function(e) {
+      if (e.target === this) closeClientModal();
+    });
+
+    document.getElementById('clientForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var id = document.getElementById('clientId').value;
+      var data = {
+        name: document.getElementById('clientName').value.trim(),
+        contact_phone: document.getElementById('clientPhone').value.trim(),
+        contact_email: document.getElementById('clientEmail').value.trim(),
+        address: document.getElementById('clientAddress').value.trim(),
+        notes: document.getElementById('clientNotes').value.trim()
+      };
+      if (!data.name) { showToast('Client name is required', 'error'); return; }
+      try {
+        if (id) {
+          await window.api.put('/clients/' + id, data);
+          showToast('Client updated successfully', 'success');
+        } else {
+          await window.api.post('/clients', data);
+          showToast('Client created successfully', 'success');
+        }
+        closeClientModal();
+        loadClientsPage();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    });
+
+    async function deleteClientById(id) {
+      var confirmed = await confirmAction('Delete this client? This cannot be undone.');
+      if (!confirmed) return;
+      try {
+        await window.api.delete('/clients/' + id);
+        showToast('Client deleted', 'success');
+        loadClientsPage();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    }
+
+    async function viewClientHistory(id) {
+      var client = allClients.find(function(c) { return c.id === id; });
+      if (!client) return;
+      document.getElementById('historyModalTitle').textContent = 'Booking History — ' + client.name;
+      document.getElementById('historyTbody').innerHTML = '<tr><td colspan="4" class="empty-table-row">Loading…</td></tr>';
+      document.getElementById('historyModal').style.display = 'flex';
+      try {
+        var bookings = await window.api.get('/bookings');
+        var clientBookings = bookings.filter(function(b) {
+          return b.email && client.contact_email &&
+                 b.email.toLowerCase() === client.contact_email.toLowerCase();
+        });
+        var tbody = document.getElementById('historyTbody');
+        if (!clientBookings.length) {
+          tbody.innerHTML = '<tr class="empty-table-row"><td colspan="4">No bookings found for this client</td></tr>';
+        } else {
+          var statusMap = { pending:'badge-warning', confirmed:'badge-primary', 'in-progress':'badge-purple', completed:'badge-success', cancelled:'badge-danger' };
+          tbody.innerHTML = clientBookings.map(function(b) {
+            var date = b.booking_date ? new Date(b.booking_date).toLocaleDateString() : new Date(b.created_at).toLocaleDateString();
+            var badgeCls = statusMap[b.status] || 'badge-warning';
+            return '<tr><td>' + escapeHtml(String(b.booking_id || b.id)) + '</td><td>' + escapeHtml(b.service || '-') + '</td><td>' + date + '</td><td><span class="badge ' + badgeCls + '">' + escapeHtml(b.status || 'pending') + '</span></td></tr>';
+          }).join('');
+        }
+      } catch (err) {
+        document.getElementById('historyTbody').innerHTML = '<tr class="empty-table-row"><td colspan="4">Error: ' + escapeHtml(err.message) + '</td></tr>';
+      }
+    }
+
+    function closeHistoryModal() { document.getElementById('historyModal').style.display = 'none'; }
+    document.getElementById('historyModalClose').addEventListener('click', closeHistoryModal);
+    document.getElementById('historyModalCloseBtn').addEventListener('click', closeHistoryModal);
+    document.getElementById('historyModal').addEventListener('click', function(e) { if (e.target === this) closeHistoryModal(); });
+
+    function showToast(message, type) {
+      type = type || 'info';
+      var container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+      var toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(function() { if (toast.parentNode) toast.remove(); }, 5000);
+    }
+
+    function confirmAction(message) {
+      return new Promise(function(resolve) {
+        var modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = '<div class="modal-panel modal-panel-sm"><div class="modal-header"><h2>Confirm</h2></div><div class="modal-body"><p>' + escapeHtml(message) + '</p></div><div class="modal-footer"><button class="compact-btn compact-btn-outline" id="confirmNo">Cancel</button><button class="action-btn" id="confirmYes">Confirm</button></div></div>';
+        document.body.appendChild(modal);
+        modal.querySelector('#confirmYes').onclick = function() { modal.remove(); resolve(true); };
+        modal.querySelector('#confirmNo').onclick = function() { modal.remove(); resolve(false); };
       });
-    </script>
-  </body>
+    }
+
+    function escapeHtml(s) {
+      return String(s||'').replace(/[&<>"']/g, function(ch) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout({ title: 'Clients', activePage: 'clients' });
+      document.getElementById('newClientBtn').addEventListener('click', function() { openClientModal(null); });
+      loadClientsPage();
+    });
+  </script>
+</body>
 </html>

@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Analytics — Hunter Auto Admin</title>
+  <link rel="stylesheet" href="styles-clean.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <main class="main-area">
+      <section class="main-content">
+        <div class="page-header">
+          <h1>Analytics</h1>
+          <button class="compact-btn compact-btn-outline" id="refreshAnalyticsBtn">🔄 Refresh</button>
+        </div>
+
+        <div id="analyticsError" class="error-message"></div>
+
+        <!-- Summary Stats -->
+        <div class="compact-stats-grid" id="analyticsStatsGrid">
+          <div class="compact-stat-card">
+            <div class="compact-stat-number" id="aTotalBookings">
+              <div class="skeleton" style="height:2.5rem;width:60%;border-radius:6px;"></div>
+            </div>
+            <div class="compact-stat-label">Total Bookings</div>
+          </div>
+          <div class="compact-stat-card">
+            <div class="compact-stat-number" id="aPendingBookings">
+              <div class="skeleton" style="height:2.5rem;width:60%;border-radius:6px;"></div>
+            </div>
+            <div class="compact-stat-label">Pending</div>
+          </div>
+          <div class="compact-stat-card">
+            <div class="compact-stat-number" id="aMonthlyRevenue">
+              <div class="skeleton" style="height:2.5rem;width:80%;border-radius:6px;"></div>
+            </div>
+            <div class="compact-stat-label">Monthly Revenue</div>
+          </div>
+          <div class="compact-stat-card">
+            <div class="compact-stat-number" id="aTodayRevenue">
+              <div class="skeleton" style="height:2.5rem;width:80%;border-radius:6px;"></div>
+            </div>
+            <div class="compact-stat-label">Today's Revenue</div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+          <!-- Revenue by Month -->
+          <div class="chart-card">
+            <h3>Revenue by Month (TSh)</h3>
+            <div class="chart-wrapper" id="revenueChartWrapper">
+              <div class="chart-loading">
+                <div class="chart-spinner"></div>
+                <span>Loading chart data…</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bookings by Status -->
+          <div class="chart-card">
+            <h3>Bookings by Status</h3>
+            <div class="chart-wrapper" id="statusChartWrapper">
+              <div class="chart-loading">
+                <div class="chart-spinner"></div>
+                <span>Loading chart data…</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Services -->
+          <div class="chart-card">
+            <h3>Top Services by Bookings</h3>
+            <div class="chart-wrapper" id="servicesChartWrapper">
+              <div class="chart-loading">
+                <div class="chart-spinner"></div>
+                <span>Loading chart data…</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="toolbar" style="margin-top:1rem;">
+          <button class="action-btn" id="exportAnalyticsPdfBtn">📄 Export PDF Report</button>
+          <button class="compact-btn compact-btn-outline" id="exportAnalyticsExcelBtn">📊 Export Excel</button>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="api.js"></script>
+  <script src="layout.js"></script>
+  <script src="admin.js"></script>
+  <script>
+    var revenueChart = null;
+    var statusChart = null;
+    var servicesChart = null;
+    var analyticsData = null;
+    var bookingsData = null;
+
+    function showChartLoading(wrapperId) {
+      var wrapper = document.getElementById(wrapperId);
+      if (!wrapper) return;
+      wrapper.innerHTML = '<div class="chart-loading"><div class="chart-spinner"></div><span>Loading…</span></div>';
+    }
+
+    function showChartEmpty(wrapperId, message) {
+      var wrapper = document.getElementById(wrapperId);
+      if (!wrapper) return;
+      wrapper.innerHTML = '<div class="chart-loading"><span style="font-size:2rem;">📊</span><span>' + (message || 'No data available') + '</span></div>';
+    }
+
+    function ensureCanvas(wrapperId, canvasId) {
+      var wrapper = document.getElementById(wrapperId);
+      if (!wrapper) return null;
+      wrapper.innerHTML = '<canvas id="' + canvasId + '"></canvas>';
+      return document.getElementById(canvasId);
+    }
+
+    async function loadAnalyticsData() {
+      // Show skeletons
+      ['aTotalBookings','aPendingBookings','aMonthlyRevenue','aTodayRevenue'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.innerHTML = '<div class="skeleton" style="height:2.5rem;width:60%;border-radius:6px;"></div>';
+      });
+      showChartLoading('revenueChartWrapper');
+      showChartLoading('statusChartWrapper');
+      showChartLoading('servicesChartWrapper');
+
+      var errEl = document.getElementById('analyticsError');
+      errEl.style.display = 'none';
+
+      try {
+        var results = await Promise.all([
+          window.api.get('/dashboard/overview'),
+          window.api.get('/dashboard/analytics'),
+          window.api.get('/bookings')
+        ]);
+        var overview = results[0];
+        analyticsData = results[1];
+        bookingsData = results[2];
+
+        // Update stat cards
+        document.getElementById('aTotalBookings').textContent = overview.total_bookings || 0;
+        document.getElementById('aPendingBookings').textContent = overview.pending_bookings || 0;
+        document.getElementById('aMonthlyRevenue').textContent = 'TSh ' + (overview.monthly_revenue_tsh || 0).toLocaleString();
+        document.getElementById('aTodayRevenue').textContent = 'TSh ' + (overview.today_revenue_tsh || 0).toLocaleString();
+
+        renderRevenueChart(analyticsData.monthly_revenue || []);
+        renderStatusChart(bookingsData);
+        renderServicesChart(analyticsData.top_services || []);
+
+      } catch (err) {
+        errEl.textContent = 'Failed to load analytics: ' + err.message;
+        errEl.style.display = 'block';
+        showChartEmpty('revenueChartWrapper', 'Failed to load data');
+        showChartEmpty('statusChartWrapper', 'Failed to load data');
+        showChartEmpty('servicesChartWrapper', 'Failed to load data');
+      }
+    }
+
+    function renderRevenueChart(monthlyRevenue) {
+      if (!monthlyRevenue.length) {
+        showChartEmpty('revenueChartWrapper', 'No revenue data for this year');
+        return;
+      }
+      var canvas = ensureCanvas('revenueChartWrapper', 'revenueCanvas');
+      if (!canvas) return;
+
+      // Build 12-month array
+      var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var revenueByMonth = new Array(12).fill(0);
+      monthlyRevenue.forEach(function(row) {
+        var idx = (row.month || 1) - 1;
+        if (idx >= 0 && idx < 12) revenueByMonth[idx] = row.revenue || 0;
+      });
+
+      if (revenueChart) { revenueChart.destroy(); revenueChart = null; }
+      revenueChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: monthNames,
+          datasets: [{
+            label: 'Revenue (TSh)',
+            data: revenueByMonth,
+            backgroundColor: 'rgba(0, 178, 255, 0.7)',
+            borderColor: '#00B2FF',
+            borderWidth: 2,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) { return 'TSh ' + ctx.raw.toLocaleString(); }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(val) { return 'TSh ' + val.toLocaleString(); }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderStatusChart(bookings) {
+      if (!bookings || !bookings.length) {
+        showChartEmpty('statusChartWrapper', 'No booking data');
+        return;
+      }
+      var canvas = ensureCanvas('statusChartWrapper', 'statusCanvas');
+      if (!canvas) return;
+
+      var counts = { pending: 0, confirmed: 0, 'in-progress': 0, completed: 0, cancelled: 0 };
+      bookings.forEach(function(b) {
+        if (counts.hasOwnProperty(b.status)) counts[b.status]++;
+      });
+
+      if (statusChart) { statusChart.destroy(); statusChart = null; }
+      statusChart = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+          labels: ['Pending', 'Confirmed', 'In Progress', 'Completed', 'Cancelled'],
+          datasets: [{
+            data: [counts.pending, counts.confirmed, counts['in-progress'], counts.completed, counts.cancelled],
+            backgroundColor: ['#F59E0B', '#00B2FF', '#8B5CF6', '#10B981', '#EF4444'],
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    }
+
+    function renderServicesChart(topServices) {
+      if (!topServices || !topServices.length) {
+        showChartEmpty('servicesChartWrapper', 'No service data');
+        return;
+      }
+      var canvas = ensureCanvas('servicesChartWrapper', 'servicesCanvas');
+      if (!canvas) return;
+
+      if (servicesChart) { servicesChart.destroy(); servicesChart = null; }
+      servicesChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: topServices.map(function(s) { return s.service; }),
+          datasets: [{
+            label: 'Bookings',
+            data: topServices.map(function(s) { return s.booking_count; }),
+            backgroundColor: [
+              'rgba(0, 178, 255, 0.7)',
+              'rgba(139, 92, 246, 0.7)',
+              'rgba(16, 185, 129, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(239, 68, 68, 0.7)'
+            ],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+      });
+    }
+
+    // Export PDF
+    document.getElementById('exportAnalyticsPdfBtn').addEventListener('click', function() {
+      try {
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text('Hunter Autoworks — Analytics Report', 20, 20);
+        doc.setFontSize(11);
+        doc.text('Generated: ' + new Date().toLocaleString(), 20, 30);
+        doc.text('Total Bookings: ' + document.getElementById('aTotalBookings').textContent, 20, 45);
+        doc.text('Pending: ' + document.getElementById('aPendingBookings').textContent, 20, 53);
+        doc.text('Monthly Revenue: ' + document.getElementById('aMonthlyRevenue').textContent, 20, 61);
+        doc.text("Today's Revenue: " + document.getElementById('aTodayRevenue').textContent, 20, 69);
+        if (analyticsData && analyticsData.top_services && analyticsData.top_services.length) {
+          doc.text('Top Services:', 20, 82);
+          analyticsData.top_services.forEach(function(s, i) {
+            doc.text((i+1) + '. ' + s.service + ' — ' + s.booking_count + ' bookings', 25, 90 + i * 8);
+          });
+        }
+        doc.save('analytics_' + new Date().toISOString().split('T')[0] + '.pdf');
+        showToast('PDF exported', 'success');
+      } catch (err) {
+        showToast('PDF export failed: ' + err.message, 'error');
+      }
+    });
+
+    // Export Excel
+    document.getElementById('exportAnalyticsExcelBtn').addEventListener('click', function() {
+      try {
+        var rows = (bookingsData || []).map(function(b) {
+          return {
+            'Booking ID': b.booking_id || b.id,
+            'Customer': [b.first_name, b.last_name].filter(Boolean).join(' '),
+            'Service': b.service || '',
+            'Status': b.status || '',
+            'Date': b.booking_date ? new Date(b.booking_date).toLocaleDateString() : new Date(b.created_at).toLocaleDateString()
+          };
+        });
+        var ws = XLSX.utils.json_to_sheet(rows);
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Bookings');
+        XLSX.writeFile(wb, 'analytics_' + new Date().toISOString().split('T')[0] + '.xlsx');
+        showToast('Excel exported', 'success');
+      } catch (err) {
+        showToast('Excel export failed: ' + err.message, 'error');
+      }
+    });
+
+    document.getElementById('refreshAnalyticsBtn').addEventListener('click', loadAnalyticsData);
+
+    function showToast(message, type) {
+      type = type || 'info';
+      var container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+      var toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(function() { if (toast.parentNode) toast.remove(); }, 5000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout({ title: 'Analytics', activePage: 'analytics' });
+      loadAnalyticsData();
+    });
+  </script>
+</body>
+</html>

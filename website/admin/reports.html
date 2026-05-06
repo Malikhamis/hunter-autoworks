@@ -1,48 +1,289 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Reports — Hunter Auto</title>
-    <link rel="stylesheet" href="styles-clean.css" />
-  </head>
-  <body>
-    <div class="app-shell">
-      <aside class="sidebar" role="navigation">
-        <div class="brand"><div style="font-weight:900">Hunter Auto</div><div class="small">Admin</div></div>
-        <nav class="nav">
-          <a href="dashboard.html">Dashboard</a>
-          <a href="documents.html">Documents</a>
-          <a href="invoices.html">Invoices</a>
-          <a href="clients.html">Clients</a>
-          <a href="services.html">Services</a>
-          <a href="reports.html" class="active">Reports</a>
-          <a href="settings.html">Settings</a>
-        </nav>
-      </aside>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reports — Hunter Auto Admin</title>
+  <link rel="stylesheet" href="styles-clean.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <main class="main-area">
+      <section class="main-content">
+        <div class="page-header">
+          <h1>Reports</h1>
+        </div>
 
-      <main class="main-area">
-        <header class="topbar">
-          <div class="left">
-            <button id="hamburger" class="hamburger" aria-label="Open menu">☰</button>
-            <div class="brand"><h1>Reports</h1></div>
+        <!-- Date Range Picker -->
+        <div class="card" style="margin-bottom:1.5rem;">
+          <h2 class="section-title">Generate Report</h2>
+          <div class="toolbar">
+            <div class="form-group" style="margin:0;flex:1;">
+              <label for="reportFrom">From Date</label>
+              <input type="date" id="reportFrom" class="toolbar-search" />
+            </div>
+            <div class="form-group" style="margin:0;flex:1;">
+              <label for="reportTo">To Date</label>
+              <input type="date" id="reportTo" class="toolbar-search" />
+            </div>
+            <button class="action-btn" id="generateReportBtn" style="align-self:flex-end;">Generate Report</button>
           </div>
-        </header>
-        <section style="padding:18px">
+        </div>
+
+        <!-- Summary Cards (hidden until generated) -->
+        <div id="reportSummary" style="display:none;">
+          <div class="summary-stats-grid" id="summaryStatsGrid">
+            <div class="summary-stat-card">
+              <div class="summary-stat-value" id="rptTotalBookings">0</div>
+              <div class="summary-stat-label">Total Bookings</div>
+            </div>
+            <div class="summary-stat-card">
+              <div class="summary-stat-value" id="rptCompleted">0</div>
+              <div class="summary-stat-label">Completed</div>
+            </div>
+            <div class="summary-stat-card">
+              <div class="summary-stat-value" id="rptCancelled">0</div>
+              <div class="summary-stat-label">Cancelled</div>
+            </div>
+            <div class="summary-stat-card">
+              <div class="summary-stat-value" id="rptRevenue">TSh 0</div>
+              <div class="summary-stat-label">Revenue</div>
+            </div>
+          </div>
+
+          <!-- Export Buttons -->
+          <div class="toolbar" style="margin-bottom:1.5rem;">
+            <button class="action-btn" id="exportPdfBtn">📄 Export PDF</button>
+            <button class="compact-btn compact-btn-outline" id="exportExcelBtn">📊 Export Excel</button>
+          </div>
+
+          <!-- Detail Table -->
           <div class="card">
-            <h3>Overview</h3>
-            <p>Quick metrics and export options will appear here.</p>
-            <div id="reports-metrics"></div>
+            <h2 class="section-title">Booking Details</h2>
+            <div class="data-table-wrapper">
+              <table class="data-table" id="reportTable" aria-label="Report detail table">
+                <thead>
+                  <tr>
+                    <th>Booking ID</th>
+                    <th>Customer</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Revenue (TSh)</th>
+                  </tr>
+                </thead>
+                <tbody id="reportTbody">
+                  <tr><td colspan="6" class="empty-table-row">No data</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </section>
-      </main>
-    </div>
+        </div>
 
-    <script src="admin.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded',()=>{
-        if (typeof loadAnalytics === 'function') loadAnalytics();
+        <!-- Empty state before generation -->
+        <div id="reportEmptyState" class="empty-state">
+          <div class="empty-state-icon">📈</div>
+          <div class="empty-state-title">Select a date range to generate a report</div>
+          <div class="empty-state-description">Choose a From and To date above, then click Generate Report.</div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="api.js"></script>
+  <script src="layout.js"></script>
+  <script src="admin.js"></script>
+  <script>
+    var reportData = [];
+    var allServices = [];
+
+    var STATUS_BADGE = {
+      pending: 'badge-warning',
+      confirmed: 'badge-primary',
+      'in-progress': 'badge-purple',
+      completed: 'badge-success',
+      cancelled: 'badge-danger'
+    };
+
+    async function generateReport() {
+      var from = document.getElementById('reportFrom').value;
+      var to = document.getElementById('reportTo').value;
+      if (!from || !to) { showToast('Please select both From and To dates', 'error'); return; }
+      if (from > to) { showToast('From date must be before To date', 'error'); return; }
+
+      var btn = document.getElementById('generateReportBtn');
+      btn.disabled = true;
+      btn.textContent = 'Generating…';
+
+      try {
+        var results = await Promise.all([
+          window.api.get('/bookings'),
+          window.api.get('/services')
+        ]);
+        var bookings = results[0];
+        allServices = results[1];
+
+        var fromDate = new Date(from);
+        var toDate = new Date(to);
+        toDate.setHours(23, 59, 59, 999);
+
+        reportData = bookings.filter(function(b) {
+          var d = new Date(b.booking_date || b.created_at);
+          return d >= fromDate && d <= toDate;
+        });
+
+        renderReport(reportData);
+        document.getElementById('reportSummary').style.display = 'block';
+        document.getElementById('reportEmptyState').style.display = 'none';
+      } catch (err) {
+        showToast('Failed to generate report: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate Report';
+      }
+    }
+
+    function getServicePrice(serviceName) {
+      var svc = allServices.find(function(s) { return s.name === serviceName; });
+      return svc ? (svc.price || 0) : 0;
+    }
+
+    function renderReport(bookings) {
+      var completed = bookings.filter(function(b) { return b.status === 'completed'; });
+      var cancelled = bookings.filter(function(b) { return b.status === 'cancelled'; });
+      var revenue = completed.reduce(function(sum, b) { return sum + getServicePrice(b.service); }, 0);
+
+      document.getElementById('rptTotalBookings').textContent = bookings.length;
+      document.getElementById('rptCompleted').textContent = completed.length;
+      document.getElementById('rptCancelled').textContent = cancelled.length;
+      document.getElementById('rptRevenue').textContent = 'TSh ' + revenue.toLocaleString();
+
+      var tbody = document.getElementById('reportTbody');
+      if (!bookings.length) {
+        tbody.innerHTML = '<tr class="empty-table-row"><td colspan="6">No bookings in this date range</td></tr>';
+        return;
+      }
+      tbody.innerHTML = bookings.map(function(b) {
+        var name = [b.first_name, b.last_name].filter(Boolean).join(' ') || 'Unknown';
+        var date = b.booking_date ? new Date(b.booking_date).toLocaleDateString() : new Date(b.created_at).toLocaleDateString();
+        var badgeCls = STATUS_BADGE[b.status] || 'badge-warning';
+        var price = b.status === 'completed' ? getServicePrice(b.service) : 0;
+        return '<tr>' +
+          '<td>' + escapeHtml(String(b.booking_id || b.id)) + '</td>' +
+          '<td>' + escapeHtml(name) + '</td>' +
+          '<td>' + escapeHtml(b.service || '-') + '</td>' +
+          '<td>' + date + '</td>' +
+          '<td><span class="badge ' + badgeCls + '">' + escapeHtml(b.status || 'pending') + '</span></td>' +
+          '<td>' + (price > 0 ? price.toLocaleString() : '-') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    // Export PDF
+    document.getElementById('exportPdfBtn').addEventListener('click', function() {
+      try {
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF();
+        var from = document.getElementById('reportFrom').value;
+        var to = document.getElementById('reportTo').value;
+        doc.setFontSize(16);
+        doc.text('Hunter Autoworks — Booking Report', 20, 20);
+        doc.setFontSize(11);
+        doc.text('Period: ' + from + ' to ' + to, 20, 30);
+        doc.text('Generated: ' + new Date().toLocaleDateString(), 20, 38);
+        doc.text('Total Bookings: ' + document.getElementById('rptTotalBookings').textContent, 20, 50);
+        doc.text('Completed: ' + document.getElementById('rptCompleted').textContent, 20, 58);
+        doc.text('Cancelled: ' + document.getElementById('rptCancelled').textContent, 20, 66);
+        doc.text('Revenue: ' + document.getElementById('rptRevenue').textContent, 20, 74);
+        var y = 90;
+        doc.setFontSize(10);
+        doc.text('Booking ID', 20, y); doc.text('Customer', 55, y); doc.text('Service', 100, y); doc.text('Status', 150, y); doc.text('Revenue', 175, y);
+        y += 6;
+        doc.line(20, y, 190, y);
+        y += 6;
+        reportData.forEach(function(b) {
+          if (y > 270) { doc.addPage(); y = 20; }
+          var name = [b.first_name, b.last_name].filter(Boolean).join(' ').substring(0, 18);
+          var price = b.status === 'completed' ? getServicePrice(b.service) : 0;
+          doc.text(String(b.booking_id || b.id).substring(0, 12), 20, y);
+          doc.text(name, 55, y);
+          doc.text((b.service || '-').substring(0, 20), 100, y);
+          doc.text(b.status || '-', 150, y);
+          doc.text(price > 0 ? price.toLocaleString() : '-', 175, y);
+          y += 7;
+        });
+        var dateStr = new Date().toISOString().split('T')[0];
+        doc.save('report_' + dateStr + '.pdf');
+        showToast('PDF exported', 'success');
+      } catch (err) {
+        showToast('PDF export failed: ' + err.message, 'error');
+      }
+    });
+
+    // Export Excel
+    document.getElementById('exportExcelBtn').addEventListener('click', function() {
+      try {
+        var rows = reportData.map(function(b) {
+          var name = [b.first_name, b.last_name].filter(Boolean).join(' ');
+          var date = b.booking_date ? new Date(b.booking_date).toLocaleDateString() : new Date(b.created_at).toLocaleDateString();
+          var price = b.status === 'completed' ? getServicePrice(b.service) : 0;
+          return {
+            'Booking ID': b.booking_id || b.id,
+            'Customer': name,
+            'Phone': b.phone || '',
+            'Service': b.service || '',
+            'Date': date,
+            'Status': b.status || '',
+            'Revenue (TSh)': price
+          };
+        });
+        var ws = XLSX.utils.json_to_sheet(rows);
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Bookings');
+        var dateStr = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(wb, 'report_' + dateStr + '.xlsx');
+        showToast('Excel exported', 'success');
+      } catch (err) {
+        showToast('Excel export failed: ' + err.message, 'error');
+      }
+    });
+
+    document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+
+    function showToast(message, type) {
+      type = type || 'info';
+      var container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+      var toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(function() { if (toast.parentNode) toast.remove(); }, 5000);
+    }
+
+    function escapeHtml(s) {
+      return String(s||'').replace(/[&<>"']/g, function(ch) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
       });
-    </script>
-  </body>
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout({ title: 'Reports', activePage: 'reports' });
+      // Default date range: current month
+      var now = new Date();
+      var firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      var today = now.toISOString().split('T')[0];
+      document.getElementById('reportFrom').value = firstDay;
+      document.getElementById('reportTo').value = today;
+    });
+  </script>
+</body>
 </html>

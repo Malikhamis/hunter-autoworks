@@ -4,8 +4,8 @@ const { client } = require('../database');
 const { body, validationResult } = require('express-validator');
 const auth = require('../utils/auth');
 
-// Get all clients
-router.get('/', async (req, res) => {
+// Get all clients (admin only)
+router.get('/', auth, async (req, res) => {
   try {
     const result = await client.query('SELECT * FROM clients ORDER BY created_at DESC');
     res.json(result.rows);
@@ -14,8 +14,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get a client by id
-router.get('/:id', async (req, res) => {
+// Get a client by id (admin only)
+router.get('/:id', auth, async (req, res) => {
   try {
     const result = await client.query('SELECT * FROM clients WHERE id = $1', [req.params.id]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Client not found' });
