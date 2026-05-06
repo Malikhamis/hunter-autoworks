@@ -16,15 +16,24 @@ const corsOptions = {
     
     const allowedOrigins = [
       'https://hunter-autoworks.vercel.app',
+      'https://hunter-autoworks-git-main-malikhamis-projects.vercel.app',
+      'https://hunter-autoworks-malikhamis-projects.vercel.app',
       'http://localhost:3000',
       'http://localhost:5000',
       'http://localhost:5001',
+      'http://localhost:8082',
       'http://127.0.0.1:3000',
       'http://127.0.0.1:5000',
-      'http://127.0.0.1:5001'
+      'http://127.0.0.1:5001',
+      'http://127.0.0.1:8082'
     ];
     
     if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // In development, allow all origins
+    if (process.env.NODE_ENV !== 'production') {
       return callback(null, true);
     }
     
@@ -35,6 +44,10 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
+
+// Body parser middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Initialize database
 initializeDatabase();
@@ -53,7 +66,28 @@ app.use('/api/attachments', require('./routes/attachments'));
 app.use('/api/payments', require('./routes/payments'));
 
 // Health check
-app.get('/', (req, res) => res.send('Hunter Autoworks API running'));
+app.get('/', (req, res) => res.json({ 
+  status: 'ok', 
+  message: 'Hunter Autoworks API running',
+  timestamp: new Date().toISOString(),
+  environment: process.env.NODE_ENV || 'development'
+}));
+
+app.get('/api', (req, res) => res.json({ 
+  status: 'ok', 
+  message: 'Hunter Autoworks API v1.0',
+  endpoints: [
+    '/api/services',
+    '/api/bookings',
+    '/api/quotes',
+    '/api/clients',
+    '/api/admin',
+    '/api/invoices',
+    '/api/documents',
+    '/api/dashboard',
+    '/api/payments'
+  ]
+}));
 
 // 404 handler
 app.use((req, res) => {
