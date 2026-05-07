@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CORS Test - Hunter Autoworks</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-card {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #0070f3;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+    }
+    button:hover {
+      background: #0051cc;
+    }
+    .success {
+      color: #0070f0;
+      background: #e6f7ff;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .error {
+      color: #d32f2f;
+      background: #ffebee;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    pre {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Hunter Autoworks CORS Test</h1>
+  <p>This page tests if the backend CORS configuration is working correctly.</p>
+
+  <div class="test-card">
+    <h2>Test 1: Health Check (GET)</h2>
+    <button onclick="testHealthCheck()">Run Test</button>
+    <div id="health-result"></div>
+  </div>
+
+  <div class="test-card">
+    <h2>Test 2: Services Endpoint (GET)</h2>
+    <button onclick="testServices()">Run Test</button>
+    <div id="services-result"></div>
+  </div>
+
+  <div class="test-card">
+    <h2>Test 3: Admin Login (POST with Preflight)</h2>
+    <button onclick="testLogin()">Run Test</button>
+    <div id="login-result"></div>
+  </div>
+
+  <div class="test-card">
+    <h2>Test 4: Run All Tests</h2>
+    <button onclick="runAllTests()">Run All Tests</button>
+  </div>
+
+  <script>
+    const API_BASE = 'https://hunter-autoworks-backend.onrender.com';
+
+    function showResult(elementId, success, message, data = null) {
+      const el = document.getElementById(elementId);
+      const className = success ? 'success' : 'error';
+      let html = `<div class="${className}">
+        <strong>${success ? '✅ Success' : '❌ Failed'}</strong><br>
+        ${message}
+      </div>`;
+      
+      if (data) {
+        html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      }
+      
+      el.innerHTML = html;
+    }
+
+    async function testHealthCheck() {
+      const resultId = 'health-result';
+      showResult(resultId, true, 'Testing...', null);
+      
+      try {
+        const response = await fetch(`${API_BASE}/`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          showResult(resultId, true, 'Health check passed!', data);
+        } else {
+          showResult(resultId, false, `HTTP ${response.status}`, data);
+        }
+      } catch (error) {
+        showResult(resultId, false, error.message, { error: error.toString() });
+      }
+    }
+
+    async function testServices() {
+      const resultId = 'services-result';
+      showResult(resultId, true, 'Testing...', null);
+      
+      try {
+        const response = await fetch(`${API_BASE}/api/services`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          showResult(resultId, true, `Received ${data.length} services`, data.slice(0, 2));
+        } else {
+          showResult(resultId, false, `HTTP ${response.status}`, data);
+        }
+      } catch (error) {
+        showResult(resultId, false, error.message, { error: error.toString() });
+      }
+    }
+
+    async function testLogin() {
+      const resultId = 'login-result';
+      showResult(resultId, true, 'Testing preflight + POST...', null);
+      
+      try {
+        const response = await fetch(`${API_BASE}/api/admin/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username: 'hunter',
+            password: 'hunter_admin1234'
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showResult(resultId, true, 'Login successful! CORS preflight passed!', { 
+            token: data.token ? data.token.substring(0, 50) + '...' : 'none',
+            username: data.username 
+          });
+        } else {
+          showResult(resultId, false, `HTTP ${response.status}`, data);
+        }
+      } catch (error) {
+        showResult(resultId, false, error.message, { 
+          error: error.toString(),
+          note: 'If you see CORS error, the preflight request failed'
+        });
+      }
+    }
+
+    async function runAllTests() {
+      await testHealthCheck();
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await testServices();
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await testLogin();
+    }
+  </script>
+</body>
+</html>
